@@ -97,19 +97,30 @@ h1,h2,h3{text-wrap:balance}
 .kp button{flex:0 1 clamp(30px,8.6%,54px);height:52px;border:0;border-radius:8px;background:var(--panel2);color:#fff;font:700 20px var(--body);padding:0;box-shadow:0 3px 0 #170c3a}
 .kp button:active{background:var(--hot)}
 .kp button.w{flex:0 1 120px;font-size:13px}
+/* no accidental zoom, selection or callouts while tapping */
+html,body,#app,.screen,#dlg,#modal,#sheet{touch-action:manipulation}
+*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* front page */
-#front .paper{background:var(--paper);color:#1b1306;border-radius:6px;padding:22px clamp(14px,3vw,34px);display:flex;flex-direction:column;gap:14px;max-width:1040px;width:100%;margin:0 auto;font-family:var(--body)}
-.mast{text-align:center;border-bottom:4px double #1b1306;padding-bottom:8px}
-.mast h1{font:400 clamp(34px,7vmin,62px)/1 var(--news);letter-spacing:.06em;text-transform:uppercase;color:#c4162a}
-.mast small{display:block;font:500 12px var(--body);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
-.stories{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
-.story{border-top:3px solid #1b1306;padding-top:8px;display:flex;flex-direction:column;gap:5px}
-.story.empty{opacity:.45;border-top-style:dashed}
-.story .h{font:400 clamp(28px,4.6vmin,40px)/1 var(--news);letter-spacing:.03em;text-transform:uppercase;color:#1b1306}
-.story .by{font:700 12px var(--body);text-transform:uppercase;letter-spacing:.06em}
-.story .fx{font-size:12px;line-height:1.35;color:#3a2f1c}
-.story .chip{background:#1b1306;color:#ffd23f}
-.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:2px solid #1b1306;padding-top:8px;font-size:13px}
+#front .paper{flex:1;min-height:0;background:var(--paper);color:#1b1306;border-radius:6px;padding:clamp(10px,2vmin,20px) clamp(12px,2.4vmin,26px);display:flex;flex-direction:column;gap:clamp(6px,1.4vmin,12px);width:100%;margin:0 auto;font-family:var(--body);overflow:hidden;position:relative}
+.mast{text-align:center;border-bottom:4px double #1b1306;padding-bottom:6px;position:relative}
+.mast h1{font:400 clamp(30px,8vmin,66px)/1 var(--news);letter-spacing:.06em;text-transform:uppercase;color:#c4162a}
+.mast .ear{display:flex;justify-content:space-between;gap:8px;font:700 clamp(9px,1.5vmin,12px) var(--body);letter-spacing:.08em;text-transform:uppercase;border-top:2px solid #1b1306;margin-top:6px;padding-top:4px}
+.stories{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:0}
+.story{min-height:0;overflow:hidden;padding:clamp(6px,1.2vmin,12px);border-right:2px solid #1b1306;border-bottom:2px solid #1b1306;display:flex;flex-direction:column;gap:clamp(3px,.7vmin,7px)}
+.story:nth-child(3n){border-right:0}.story:nth-child(n+4){border-bottom:0}
+.story.empty{opacity:.5;justify-content:center;text-align:center}
+.story .k{display:flex;justify-content:space-between;align-items:center;gap:6px;font:700 clamp(9px,1.5vmin,12px) var(--body);letter-spacing:.08em;text-transform:uppercase}
+.story .k b{background:#c4162a;color:#fff;padding:2px 6px;border-radius:3px}
+.story .ph{height:clamp(24px,6vmin,56px);background:#e8d8a8;border:2px solid #1b1306;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.4vmin,40px);filter:grayscale(.5) sepia(.3)}
+.story .h{font:400 clamp(17px,3.5vmin,32px)/1.02 var(--news);letter-spacing:.03em;text-transform:uppercase;color:#1b1306;overflow-wrap:anywhere}
+.story .by{font:700 clamp(9px,1.5vmin,12px) var(--body);text-transform:uppercase;letter-spacing:.06em}
+.story .fx{font-size:clamp(9px,1.5vmin,12px);line-height:1.3;color:#3a2f1c;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.story .chip{background:#1b1306;color:#ffd23f;font-size:clamp(9px,1.5vmin,12px);padding:3px 8px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:4px double #1b1306;padding-top:6px;font-size:clamp(10px,1.7vmin,14px)}
+.stamp2{position:absolute;right:3%;top:19%;transform:rotate(-8deg);border:4px solid #c4162a;color:#c4162a;font:400 clamp(16px,3.6vmin,32px) var(--news);letter-spacing:.08em;padding:2px 12px;border-radius:6px;opacity:.85;pointer-events:none}
+#front.clean .noprint{display:none}
+@media (orientation:portrait){.stories{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,minmax(0,1fr))}.story:nth-child(3n){border-right:2px solid #1b1306}.story:nth-child(2n){border-right:0}.story:nth-child(n+4){border-bottom:2px solid #1b1306}.story:nth-child(n+5){border-bottom:0}.story .h{font-size:clamp(17px,2.9vmin,30px)}}
+@media (max-width:560px){#front{overflow:auto}#front .paper{overflow:visible;flex:none}.stories{display:flex;flex-direction:column}.story{border-right:0!important;border-bottom:2px solid #1b1306!important}}
 @media print{body{overflow:visible;background:#fff}.noprint{display:none!important}#app,.screen{position:static}}
 /* play: full-bleed world with overlay controls */
 #play{display:block}
@@ -1660,16 +1671,23 @@ function editorRound(){
   $('ok').onclick=()=>{closeM();front()}};
  intro();
 }
+const BADGE=['🐊','🛒','🦆','🦜','⛳','🏨'],SECT=['ZOO NEWS','NIGHT SHIFT','HARBOUR','TRAILER PARK','SPORT','MOTEL'];
 function front(){
- const d=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
- $('front').innerHTML=`<div class="row noprint" style="justify-content:space-between"><button class="btn ghost sm" id="f-back">Back to cases</button><button class="btn sun sm" id="f-bonus">Bonus: editor\'s desk</button><span class="mute" style="font-size:13px">To keep a copy, take a screenshot of this page.</span></div><div class="scroll" style="flex:1"><div class="paper"><div class="mast"><h1>The Gulch Gazette</h1><small>${esc(d)} · Gator Gulch &amp; surrounding swamp · 50¢</small></div><div class="stories">${CASES.map((l,i)=>{const s=S.done[i];
-  return s?`<div class="story"><span class="by">Case ${i+1} · ${esc(l.n)}</span><div class="h">${esc(s.hl)}</div><span class="by">By ${esc(jname())}</span><div>${l.d.map(x=>'<span class="chip">'+DEV[x].n+'</span>').join(' ')}</div><div class="fx">${s.facts.map(esc).join(' ')}</div></div>`:`<div class="story empty"><span class="by">Case ${i+1} · ${esc(l.n)}</span><div class="h">Story not filed</div></div>`}).join('')}</div><div class="foot"><span>Reporter: <b>${esc(S.real)}</b> (writing as ${esc(jname())})</span><span>Score: <b>${total()}</b></span></div></div></div>`;
- $('f-back').onclick=()=>{renderCases();show('cases')};$('f-bonus').onclick=()=>{if(allDone())editorRound();else{const n=Object.keys(S.done).length;openM(`<span class="call">Editor's desk</span><div class="big" style="color:#fff">Not yet, rookie</div><div class="bubble"><b>Mags:</b> A desk is earned. File a story on every case and then we'll talk promotion. You've filed ${n} of ${CASES.length}.</div><button class="btn teal" id="ok">Back to the front page</button>`);$('ok').onclick=closeM}};
- $('f-bonus').classList.toggle('dis',!allDone());$('f-bonus').textContent=allDone()?"Bonus: editor's desk":"Editor's desk: locked ("+Object.keys(S.done).length+"/"+CASES.length+")";
+ const d=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),n=Object.keys(S.done).length;
+ const lead=Object.keys(S.done).sort((a,b)=>S.done[b].pts-S.done[a].pts)[0];
+ const cell=(l,i)=>{const s=S.done[i];
+  return s?`<div class="story"><div class="k"><span>${SECT[i]} · Case ${i+1}</span>${+lead===i&&n>1?'<b>Lead story</b>':''}</div><div class="ph">${BADGE[i]}</div><div class="h">${esc(s.hl)}</div><span class="by">By ${esc(jname())}</span><div>${l.d.map(x=>'<span class="chip">'+DEV[x].n+'</span>').join(' ')}</div><div class="fx">${s.facts.map(esc).join(' ')}</div></div>`:`<div class="story empty"><div class="k"><span>${SECT[i]} · Case ${i+1}</span></div><div class="ph" style="margin:0 auto">${BADGE[i]}</div><div class="h" style="font-size:.8em">Story not filed</div></div>`};
+ $('front').innerHTML=`<div class="row noprint" style="justify-content:space-between"><button class="btn ghost sm" id="f-back">Back to cases</button><button class="btn sun sm" id="f-bonus">Bonus</button><button class="btn teal sm" id="f-clean">Clean view for screenshot</button></div><div class="paper" id="paper"><div class="mast"><h1>The Gulch Gazette</h1><div class="ear"><span>${esc(d)}</span><span>Said Read Redemption edition</span><span>Gator Gulch &amp; surrounding swamp · 50¢</span></div></div>${n===CASES.length?'<div class="stamp2">Front page complete</div>':''}<div class="stories">${CASES.map(cell).join('')}</div><div class="foot"><span>Reporter: <b>${esc(S.real)}</b> (writing as <b>${esc(jname())}</b>)</span><span>Stories filed: <b>${n}/${CASES.length}</b>${S.bonus?' · Editor\'s desk: <b>'+S.bonus+'/100</b>':''}</span><span>Score: <b>${total()}</b></span></div></div>`;
+ $('f-back').onclick=()=>{renderCases();show('cases')};
+ $('f-clean').onclick=()=>{$('front').classList.add('clean');$('paper').onclick=()=>{$('front').classList.remove('clean');$('paper').onclick=null}};
+ $('f-bonus').onclick=()=>{if(allDone())editorRound();else{openM(`<span class="call">Editor's desk</span><div class="big" style="color:#fff">Not yet, rookie</div><div class="bubble"><b>Mags:</b> A desk is earned. File a story on every case and then we'll talk promotion. You've filed ${n} of ${CASES.length}.</div><button class="btn teal" id="ok">Back to the front page</button>`);$('ok').onclick=closeM}};
+ $('f-bonus').classList.toggle('dis',!allDone());$('f-bonus').textContent=allDone()?"Bonus: editor's desk":"Editor's desk: locked ("+n+"/"+CASES.length+")";
 }
 /* boot */
 try{['20px Bangers','12px "Press Start 2P"','700 16px Rubik'].forEach(f=>document.fonts.load(f))}catch(e){}
 $('modal').addEventListener('contextmenu',e=>e.preventDefault());
-document.addEventListener('gesturestart',e=>e.preventDefault());
+['gesturestart','gesturechange','gestureend','dblclick'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+let lastTap=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastTap<350&&e.cancelable&&!e.target.closest('button'))e.preventDefault();lastTap=n},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1&&e.cancelable)e.preventDefault()},{passive:false});
 renderSetup();show('title');
 </script>
