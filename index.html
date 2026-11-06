@@ -1,0 +1,1675 @@
+<meta charset="utf-8">
+<title>Said Read Redemption</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&family=Rubik:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-screen arcade cabinet. Map beside a thumb d-pad on iPad; the Headline Desk is a tile builder, so no keyboard ever opens. */
+:root{--ink:#150b30;--panel:#241450;--panel2:#352074;--hot:#ff3d8b;--teal:#1de9d2;--sun:#ffd23f;--paper:#fff4d6;--ok:#3ddc84;--warn:#ff8a3d;--bad:#ff4d5e;--fg:#fdf6ff;--mute:#b9a8e6;--pix:'Press Start 2P',monospace;--news:'Bangers',Impact,sans-serif;--body:'Rubik',system-ui,sans-serif;color-scheme:dark}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;padding-block:6px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--ink);color:var(--fg);font:500 16px/1.4 var(--body);overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#app{position:relative;height:100%}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0;gap:10px}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{text-wrap:balance}
+.pix{font-family:var(--pix);text-transform:uppercase;line-height:1.5}
+.mute{color:var(--mute)}
+.btn{font:400 11px/1.3 var(--pix);text-transform:uppercase;min-height:48px;padding:12px 16px;border:0;border-radius:6px;background:var(--hot);color:#fff;box-shadow:0 5px 0 #8f1049;cursor:pointer;touch-action:manipulation}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #8f1049}
+.btn.teal{background:var(--teal);color:#06302c;box-shadow:0 5px 0 #0b8176}
+.btn.sun{background:var(--sun);color:#3a2a00;box-shadow:0 5px 0 #a47e00}
+.btn.ghost{background:var(--panel2);box-shadow:0 5px 0 #170c3a}
+.btn.sm{min-height:42px;padding:9px 11px;font-size:9px}
+.btn.on{outline:3px solid var(--sun)}
+.btn:disabled{opacity:.4;pointer-events:none}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.panel{background:var(--panel);border:3px solid var(--panel2);border-radius:12px;padding:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chip{display:inline-block;font:700 12px/1 var(--body);padding:5px 9px;border-radius:99px;background:var(--panel2);color:var(--teal)}
+.chip.t{background:var(--teal);color:#06302c}
+/* title */
+.cab{border-radius:14px;overflow:hidden}
+#title{align-items:center;justify-content:center;text-align:center;background:linear-gradient(#2b0b5e 0%,#7a1a8c 40%,#ff3d8b 64%,#ffb347 80%)}
+#title::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22%;background:repeating-linear-gradient(90deg,rgba(29,233,210,.5) 0 2px,transparent 2px 48px),repeating-linear-gradient(0deg,rgba(29,233,210,.5) 0 2px,transparent 2px 24px),#150b30}
+#title>*{position:relative;z-index:1}
+.disc{width:min(30vmin,240px);aspect-ratio:1;border-radius:50%;background:linear-gradient(#ffd23f,#ff3d8b);-webkit-mask-image:linear-gradient(#000 52%,transparent 52%),repeating-linear-gradient(#000 0 9px,transparent 9px 14px);mask-image:linear-gradient(#000 52%,transparent 52%),repeating-linear-gradient(#000 0 9px,transparent 9px 14px)}
+.logo{font:400 clamp(20px,5.4vmin,46px)/1.25 var(--pix);text-transform:uppercase;color:#fff;text-shadow:3px 3px 0 var(--hot),6px 6px 0 #5a0f66;margin-top:-6vmin}
+.logo small{display:block;font-size:.45em;color:var(--sun);text-shadow:2px 2px 0 #5a0f66;margin-top:10px}
+.palm{position:absolute!important;bottom:18%;font-size:clamp(60px,16vmin,150px);line-height:1;z-index:2!important}
+/* setup */
+#setup,#levels{padding-block:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{min-height:56px;display:flex;align-items:center;padding:10px 14px;border-radius:8px;background:var(--ink);border:3px dashed var(--teal);font:700 22px var(--body);cursor:pointer}
+.field.empty{color:var(--mute);font-weight:500}
+.spin{display:flex;align-items:center;gap:6px}
+.spin b{flex:1;text-align:center;font:700 20px var(--body);background:var(--ink);border-radius:8px;padding:10px 4px}
+.spin button{width:46px;height:46px;border:0;border-radius:8px;background:var(--panel2);color:var(--sun);font-size:20px}
+.pass{font:700 26px var(--news);letter-spacing:.06em;color:var(--sun);text-align:center;padding:10px;border:3px solid var(--sun);border-radius:8px;transform:rotate(-1.5deg)}
+.lab{font:400 9px/1.4 var(--pix);text-transform:uppercase;color:var(--mute);margin-bottom:8px;display:block}
+/* levels */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.lc{text-align:left;color:var(--fg);font:500 15px/1.35 var(--body);padding:14px;border-radius:12px;border:3px solid var(--panel2);background:var(--panel);cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:148px}
+.lc:active{background:var(--panel2)}
+.lc.done{border-color:var(--ok)}
+.lc h3{font:400 11px/1.5 var(--pix);text-transform:uppercase}
+.lc .hlx{font:400 24px/1.05 var(--news);color:var(--sun);letter-spacing:.03em}
+.stars{color:var(--sun);letter-spacing:2px}
+/* play */
+#toast{position:fixed;left:50%;top:max(14px,env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:80;background:var(--hot);color:#fff;font:700 16px var(--body);padding:10px 16px;border-radius:99px;box-shadow:0 6px 0 #8f1049;max-width:92vw;text-align:center}
+/* desk */
+#desk{display:grid;grid-template-columns:minmax(250px,34%) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:12px}
+.dl,.dr{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.hl{min-height:112px;padding:12px;border-radius:10px;background:#d6283b;transform:rotate(-.6deg);display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;box-shadow:0 6px 0 #7a1020}
+.hl .ph{font:400 24px var(--news);color:#ffb3bb;letter-spacing:.04em;align-self:center}
+.hl button{font:400 clamp(26px,5vmin,40px)/1 var(--news);letter-spacing:.04em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.22);border:0;border-radius:6px;padding:4px 9px;min-height:44px}
+.chk{display:flex;flex-direction:column;gap:5px;font-size:14px}
+.chk div{display:flex;gap:8px;align-items:flex-start}
+.chk b{width:18px;flex:none;text-align:center}
+.chk .ok b{color:var(--ok)}.chk .no b{color:var(--bad)}.chk .no span{color:#ffd0d5}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{font:700 16px var(--body);min-height:46px;padding:9px 13px;border-radius:8px;border:2px solid var(--ok);background:var(--panel2);color:#fff}
+.tile.r{border-style:dashed;border-color:var(--warn)}
+.tile.g{border-color:var(--mute);background:var(--panel);color:var(--mute)}
+.tile.used{opacity:.25;pointer-events:none}
+.acts{display:flex;gap:8px;flex-wrap:wrap;flex:none}
+#bank{flex:1;min-height:90px}
+.ev{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.ev p{padding:8px 10px;border-radius:8px;background:var(--ink);border-left:5px solid var(--ok)}
+.ev p.r{border-left-color:var(--warn)}
+.stamp{font:400 8px var(--pix);text-transform:uppercase;display:block;margin-bottom:4px;color:var(--ok)}
+.r .stamp{color:var(--warn)}
+@media (max-width:820px){#desk{grid-template-columns:1fr;grid-template-rows:none;overflow-y:auto;-webkit-overflow-scrolling:touch;align-content:start}}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(10,4,30,.82);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+#sheet{width:100%;max-width:660px;max-height:94%;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px}
+.call{font:400 10px var(--pix);text-transform:uppercase;color:var(--teal)}
+.bubble{background:var(--ink);border-radius:10px;padding:12px 14px;font-size:17px}
+.big{font:400 clamp(26px,6vmin,46px)/1.05 var(--news);letter-spacing:.04em;color:var(--sun);text-transform:uppercase}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts .btn{font-size:10px}
+.opts .bad{background:#444;box-shadow:none;opacity:.5}
+.opts .good{background:var(--ok);color:#052e16}
+.kd{min-height:56px;background:var(--ink);border-radius:8px;padding:10px 14px;font:700 24px var(--body);border:3px solid var(--teal);word-break:break-all}
+.kp{display:flex;flex-direction:column;gap:6px;align-items:center}
+.kp div{display:flex;gap:5px;justify-content:center;width:100%}
+.kp button{flex:0 1 clamp(30px,8.6%,54px);height:52px;border:0;border-radius:8px;background:var(--panel2);color:#fff;font:700 20px var(--body);padding:0;box-shadow:0 3px 0 #170c3a}
+.kp button:active{background:var(--hot)}
+.kp button.w{flex:0 1 120px;font-size:13px}
+/* front page */
+#front .paper{background:var(--paper);color:#1b1306;border-radius:6px;padding:22px clamp(14px,3vw,34px);display:flex;flex-direction:column;gap:14px;max-width:1040px;width:100%;margin:0 auto;font-family:var(--body)}
+.mast{text-align:center;border-bottom:4px double #1b1306;padding-bottom:8px}
+.mast h1{font:400 clamp(34px,7vmin,62px)/1 var(--news);letter-spacing:.06em;text-transform:uppercase;color:#c4162a}
+.mast small{display:block;font:500 12px var(--body);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.stories{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.story{border-top:3px solid #1b1306;padding-top:8px;display:flex;flex-direction:column;gap:5px}
+.story.empty{opacity:.45;border-top-style:dashed}
+.story .h{font:400 clamp(28px,4.6vmin,40px)/1 var(--news);letter-spacing:.03em;text-transform:uppercase;color:#1b1306}
+.story .by{font:700 12px var(--body);text-transform:uppercase;letter-spacing:.06em}
+.story .fx{font-size:12px;line-height:1.35;color:#3a2f1c}
+.story .chip{background:#1b1306;color:#ffd23f}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:2px solid #1b1306;padding-top:8px;font-size:13px}
+@media print{body{overflow:visible;background:#fff}.noprint{display:none!important}#app,.screen{position:static}}
+/* play: full-bleed world with overlay controls */
+#play{display:block}
+#stage{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:#000}
+#cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;image-rendering:pixelated}
+.bar{position:absolute;left:0;right:0;height:0;background:#000;transition:height .5s;z-index:4;pointer-events:none}
+.cine .bar{height:11%}
+#bt{top:0}#bb{bottom:0}
+#hud{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;gap:8px;z-index:6;pointer-events:none}
+#hud>*{pointer-events:auto}
+#obj{max-width:min(46vw,420px);background:rgba(21,11,48,.82);border:2px solid var(--teal);border-radius:10px;padding:8px 12px;font:500 14px/1.3 var(--body)}
+#obj b{display:block;font:400 8px var(--pix);color:var(--teal);margin-bottom:5px;text-transform:uppercase}
+#hbtn{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ctl{position:absolute;bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:6}
+.ctl.off{display:none}
+.dpad{--k:clamp(58px,10vmin,86px);display:grid;grid-template-columns:repeat(3,var(--k));grid-template-rows:repeat(3,var(--k));gap:5px;left:12px;opacity:.9}
+.dpad button{border:0;border-radius:16px;background:rgba(53,32,116,.88);color:var(--sun);font-size:28px;touch-action:none;box-shadow:0 5px 0 rgba(23,12,58,.9)}
+.dpad button.on{background:var(--hot);color:#fff;transform:translateY(3px);box-shadow:none}
+#abtn{right:16px;width:clamp(84px,15vmin,124px);aspect-ratio:1;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:rgba(255,255,255,.6);font:400 clamp(11px,2vmin,15px)/1.3 var(--pix);text-transform:uppercase;touch-action:manipulation}
+#abtn.hot{background:var(--hot);color:#fff;box-shadow:0 6px 0 #8f1049,0 0 0 4px rgba(255,255,255,.35);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+#dlg{position:absolute;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:8;display:flex;gap:12px;align-items:stretch;background:rgba(21,11,48,.96);border:3px solid var(--teal);border-radius:14px;padding:12px;min-height:128px}
+#dp{width:96px;height:96px;flex:none;background:var(--panel2);border-radius:10px;image-rendering:pixelated;align-self:flex-start}
+#dbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+#dn{font:400 11px var(--pix);color:var(--sun);text-transform:uppercase}
+#dt{font:500 clamp(16px,2.6vmin,21px)/1.4 var(--body);min-height:3em}
+#dk{align-self:flex-end;font:400 10px var(--pix);color:var(--teal);animation:pulse 1s infinite}
+#dc{display:flex;flex-direction:column;gap:10px}
+#dc .q{background:var(--panel);border-left:5px solid var(--sun);padding:10px 12px;border-radius:8px;font-size:clamp(15px,2.4vmin,19px)}
+#dc .q small{display:block;color:var(--mute);margin-top:4px;font-size:13px}
+#cap{position:absolute;left:0;right:0;bottom:22%;text-align:center;z-index:7;font:400 clamp(12px,2.4vmin,18px)/1.6 var(--pix);text-transform:uppercase;color:#fff;text-shadow:3px 3px 0 #000;padding:0 8%;pointer-events:none}
+#fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .6s;z-index:20}
+#fade.on{opacity:1;pointer-events:auto}
+#fade .tc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+.tc b{font:400 clamp(16px,4vmin,34px)/1.4 var(--pix);color:var(--sun);text-transform:uppercase}
+.tc span{font:400 clamp(11px,2.2vmin,16px)/1.6 var(--pix);color:#fff;text-transform:uppercase}
+/* scene: the phone call */
+#scene{background:#07031a;overflow:hidden;border-radius:12px;gap:0}
+#scene svg.room{position:absolute;inset:0;width:100%;height:100%}
+#phone{position:absolute;left:50%;top:50%;width:clamp(150px,24vmin,230px);aspect-ratio:9/17;transform:translate(-50%,-50%);background:#14141f;border:4px solid #3a3a55;border-radius:22px;box-shadow:0 0 60px rgba(29,233,210,.55);z-index:3;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;color:#fff}
+#scap{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:15%;z-index:2;display:flex;flex-direction:column;gap:4px;background:rgba(10,6,30,.7);border:2px solid var(--teal);padding:8px 12px;border-radius:8px}#scap b{font:400 clamp(8px,1.6vmin,12px) var(--pix);color:var(--teal)}#scap span{font:700 clamp(11px,2vmin,15px) var(--body);color:#fff}
+#phone.ring{animation:buzz .5s infinite}
+#phone.away{transform:translate(-50%,-50%) scale(.4) translateY(180%);opacity:0;transition:all .6s}
+@keyframes buzz{0%,100%{transform:translate(-50%,-50%) rotate(0)}15%{transform:translate(-52%,-50%) rotate(-4deg)}30%{transform:translate(-48%,-51%) rotate(4deg)}45%{transform:translate(-52%,-49%) rotate(-3deg)}60%{transform:translate(-49%,-50%) rotate(3deg)}}
+#phone .pn{font:400 clamp(8px,1.5vmin,11px)/1.5 var(--pix);text-transform:uppercase;color:var(--teal)}
+#phone .pc{font:700 clamp(15px,2.6vmin,22px) var(--body)}
+.rings{position:absolute;left:50%;top:50%;width:10px;height:10px;z-index:2}
+.rings i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border:3px solid var(--teal);border-radius:50%;opacity:0}
+.ringing .rings i{animation:rg 1.6s infinite}
+.rings i:nth-child(2){animation-delay:.5s!important}.rings i:nth-child(3){animation-delay:1s!important}
+@keyframes rg{0%{transform:scale(1);opacity:.9}100%{transform:scale(34);opacity:0}}
+#pbtns{position:absolute;left:0;right:0;bottom:6%;display:flex;gap:16px;justify-content:center;z-index:5}
+#sc-sub{position:absolute;left:0;right:0;bottom:0;z-index:6}
+.pbtn{font:400 12px var(--pix);text-transform:uppercase;min-width:130px;min-height:60px;border:0;border-radius:99px;color:#fff;background:#2e7d32;box-shadow:0 5px 0 #14411a}
+.pbtn.no{background:#b71c1c;box-shadow:0 5px 0 #5e0f0f}
+/* press code + cases */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.step{display:flex;flex-direction:column;gap:6px}
+.step h3{font:400 11px/1.4 var(--pix);text-transform:uppercase;color:var(--sun)}
+.step p{font-size:15px}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.lc.lock{opacity:.5;cursor:default}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw button{width:38px;height:38px;border-radius:50%;border:3px solid transparent;padding:0}
+.sw button.on{border-color:#fff;box-shadow:0 0 0 3px var(--hot)}
+#pv{background:var(--panel2);border-radius:10px;image-rendering:pixelated}
+.snote{font-size:12px;color:var(--mute);display:block;margin-top:3px}
+#mtr{position:relative;height:10px;background:rgba(255,255,255,.15);border-radius:6px;margin-top:8px;overflow:hidden}
+#mf{display:block;height:100%;width:0;background:var(--teal);transition:width .4s}
+#mk{position:absolute;top:0;bottom:0;width:3px;background:var(--sun);text-decoration:none}
+#mrow{display:flex;justify-content:space-between;align-items:center;font:400 8px var(--pix);margin-top:6px;color:#fff}
+#hearts{color:#ff3d8b;font-size:15px;letter-spacing:2px;font-family:sans-serif}
+.btn.dis{opacity:.45}
+</style>
+<div id="app">
+<section class="screen cab" id="title">
+ <span class="palm" style="left:3%">🌴</span><span class="palm" style="right:3%">🌴</span>
+ <div class="disc"></div>
+ <h1 class="logo">Said Read<br>Redemption<small>A Rookie Reporter Game</small></h1>
+ <button class="btn sun" id="t-go" style="margin-top:22px;font-size:14px;padding:16px 28px">Press start</button>
+</section>
+<section class="screen" id="setup" hidden>
+ <h2 class="pix" style="font-size:14px">Press pass</h2>
+ <div class="scroll" style="flex:1;display:flex;flex-direction:column;gap:12px">
+ <div class="grid2">
+  <div class="panel"><span class="lab">Real name (teacher only)</span><div class="field empty" id="f-real" role="button" tabindex="0">Tap to type your name</div>
+   <span class="lab" style="margin-top:14px">Your reporter</span>
+   <div class="row" style="align-items:flex-start"><canvas id="pv" width="48" height="48" style="width:96px;height:96px"></canvas>
+    <div style="display:flex;flex-direction:column;gap:8px;flex:1"><div class="sw" id="sw0"></div><div class="sw" id="sw1"></div><div class="sw" id="sw2"></div></div></div><div class="spin" style="margin-top:12px"><button data-lk="3,-1" aria-label="Previous hair">◀</button><b id="lk3"></b><button data-lk="3,1" aria-label="Next hair">▶</button></div><div class="spin" style="margin-top:8px"><button data-lk="4,-1" aria-label="Previous hat">◀</button><b id="lk4"></b><button data-lk="4,1" aria-label="Next hat">▶</button></div></div>
+  <div class="panel"><span class="lab">Journalist name (printed in your by-line)</span>
+   <div class="row" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div class="spin"><button data-sp="0,-1" aria-label="Previous">◀</button><b id="sp0"></b><button data-sp="0,1" aria-label="Next">▶</button></div>
+    <div class="spin"><button data-sp="1,-1" aria-label="Previous">◀</button><b id="sp1"></b><button data-sp="1,1" aria-label="Next">▶</button></div>
+   </div>
+   <div class="pass" id="jn" style="margin-top:14px"></div><button class="btn ghost sm" id="s-rand" style="margin-top:10px;width:100%">Surprise me</button></div>
+ </div></div>
+ <button class="btn teal" id="s-go" style="align-self:flex-start">Next: the press code</button>
+</section>
+<section class="screen" id="rules" hidden>
+ <h2 class="pix" style="font-size:14px">The press code</h2>
+ <div class="scroll" style="flex:1;display:flex;flex-direction:column;gap:12px">
+ <p>You are a reporter for the Gulch Gazette. Each case is a place to explore, people to talk to, and a headline to write. Here is how it works.</p>
+ <div class="steps">
+  <div class="panel step"><h3>1. Explore</h3><p>Walk with the arrows. Tap the pink A button to talk to people or look at things. Anything with a yellow ! above it has something to say. Watch out for loose flamingos and shiny mud. Lose all your cred (the hearts) and you wake up at the entrance, minus a point penalty and a note.</p></div>
+  <div class="panel step"><h3>2. Judge</h3><p>People will tell you things. Some are facts, some are guesses, some are exaggerations, and some are just boring. You decide what goes in your notebook.</p></div>
+  <div class="panel step"><h3>3. Write</h3><p>File your story to your editor. Your Leads meter fills as you cover people and places. When you have enough, Mags rings you. Then build a tabloid headline from your notebook, using the language device she asks for. Cover every lead for a bonus.</p></div>
+  <div class="panel step"><h3>4. Spot the spin</h3><p>Answer two quick questions about headline devices. Then see your headline on the front page.</p></div>
+ </div>
+ <div class="panel"><span class="lab">What I expect from a reporter</span><ul class="rules">
+  <li>Work on your own device and your own story. Quiet chat is fine, spoiling someone's case is not.</li>
+  <li>Take your time. There are no lives and no timers, but aim for about 8 minutes a case.</li>
+  <li>Keep the sound low, or switch it off with the Sound button.</li>
+  <li>Be professional. A good reporter checks who is speaking and whether they really know.</li>
+  <li>Do not refresh the page. Your notebook and front page live on the screen.</li></ul></div>
+ </div>
+ <div class="panel"><span class="lab">Hazards</span><p style="font-size:14px">Normal has 3 hearts. Gentle has 5 hearts and slower flamingos.</p><button class="btn ghost sm" id="r-gentle">Hazards: Normal</button></div>
+ <div class="row"><button class="btn ghost" id="r-back">Back</button><button class="btn teal" id="r-go">I'm ready, boss</button></div>
+</section>
+<section class="screen" id="cases" hidden>
+ <div class="row" style="justify-content:space-between"><div class="row" id="lv-top" style="gap:24px"></div>
+  <div class="row"><button class="btn sun sm" id="l-front">Front page</button><button class="btn ghost sm" id="l-back">Press code</button></div></div>
+ <p class="mute" style="font-size:14px">Six cases. Pick any you like. Stars show how tricky the language device is, so start with the easy ones and work up.</p>
+ <div class="scroll" style="flex:1"><div class="lgrid" id="lgrid"></div></div>
+</section>
+<section class="screen cab" id="scene" hidden>
+ <svg class="room" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs><linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1238"/><stop offset="1" stop-color="#2a1a4a"/></linearGradient><linearGradient id="bm" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".0"/><stop offset=".5" stop-color="#ffd9a0" stop-opacity=".35"/><stop offset="1" stop-color="#ffd9a0" stop-opacity="0"/></linearGradient></defs>
+  <rect width="800" height="450" fill="url(#wl)"/><rect y="330" width="800" height="120" fill="#120a2a"/>
+  <rect x="60" y="50" width="220" height="190" fill="#3a2a5a"/><rect x="68" y="58" width="204" height="174" fill="#ffd9a0"/>
+  <g fill="#3a2a5a"><rect x="68" y="70" width="204" height="8"/><rect x="68" y="92" width="204" height="8"/><rect x="68" y="114" width="204" height="8"/><rect x="68" y="136" width="204" height="8"/><rect x="68" y="158" width="204" height="8"/><rect x="68" y="180" width="204" height="8"/><rect x="68" y="202" width="204" height="8"/></g>
+  <polygon points="68,232 272,232 360,450 -20,450" fill="url(#bm)"/>
+  <rect x="520" y="60" width="200" height="120" fill="#2a1a4a" stroke="#4a3a7a" stroke-width="4"/><text x="620" y="130" fill="#ff3d8b" font-size="22" text-anchor="middle" font-family="Bangers,Impact,sans-serif">NO SLEEP TILL PRINT</text>
+  <rect x="300" y="300" width="300" height="150" rx="6" fill="#4a2e22"/><rect x="300" y="300" width="300" height="12" fill="#6a4232"/>
+  <rect x="330" y="258" width="64" height="44" rx="4" fill="#14141f"/><text x="362" y="290" fill="#ff3030" font-size="26" text-anchor="middle" font-family="monospace">7:58</text>
+  <rect x="520" y="236" width="12" height="64" fill="#8a6a4a"/><polygon points="496,236 556,236 540,190 512,190" fill="#ffd966" opacity=".9"/>
+  <rect x="440" y="276" width="34" height="26" rx="4" fill="#e8e0d0"/><rect x="470" y="282" width="10" height="14" rx="5" fill="none" stroke="#e8e0d0" stroke-width="3"/>
+  <path d="M0 360 Q120 330 220 350 L220 450 L0 450Z" fill="#3a2a6a"/>
+ </svg>
+ <div id="scap"></div>
+ <div class="rings"><i></i><i></i><i></i></div>
+ <div id="phone" class="ring"><div class="pn" id="pn">Incoming call</div><div class="pc">MAGS STONE<br><span style="font-size:.6em;color:#9ad">EDITOR</span></div></div>
+ <div id="pbtns"><button class="pbtn" id="pa">Answer</button><button class="pbtn no" id="pd">Decline</button></div>
+ <div class="bar" id="sbt" style="top:0"></div><div class="bar" id="sbb" style="bottom:0"></div>
+</section>
+<section class="screen" id="play" hidden>
+ <div id="stage"><canvas id="cv"></canvas></div>
+ <div class="bar" id="bt"></div><div class="bar" id="bb"></div>
+ <div id="hud"><div id="obj"><b>Objective</b><span id="objt"></span><div id="mtr"><i id="mf"></i><u id="mk"></u></div><div id="mrow"><span id="mt"></span><span id="pts"></span><span id="hearts"></span></div></div>
+  <div id="hbtn"><button class="btn ghost sm" id="b-notes">Notebook (0)</button><button class="btn sun sm" id="b-file" >File story</button><button class="btn ghost sm" id="b-mute">Sound on</button><button class="btn ghost sm" id="b-exit">Exit</button></div></div>
+ <div class="ctl dpad" id="dpad"><span></span><button data-d="u" aria-label="Up">▲</button><span></span><button data-d="l" aria-label="Left">◀</button><span></span><button data-d="r" aria-label="Right">▶</button><span></span><button data-d="d" aria-label="Down">▼</button><span></span></div>
+ <button class="ctl" id="abtn">A</button>
+ <div id="cap"></div>
+ <div id="dlg" hidden><canvas id="dp" width="48" height="48"></canvas><div id="dbody"><div id="dn"></div><div id="dt"></div><div id="dc" hidden></div><div id="dk" hidden>Tap to continue</div></div></div>
+</section>
+<section class="screen" id="desk" hidden></section>
+<section class="screen" id="front" hidden></section>
+<div id="fade"><div class="tc" id="tc"></div></div>
+<div id="toast" hidden></div>
+<div id="modal" hidden><div class="panel" id="sheet"></div></div>
+</div>
+<script>
+'use strict';
+const DEV={
+alliteration:{n:'Alliteration',d:'Three or more nearby words that start with the same sound.',x:'Pupils Prefer Pizza'},
+statistic:{n:'Statistic',d:'A real number from the story that shocks or informs.',x:'68% drop in Wildlife Populations'},
+hyperbole:{n:'Hyperbole',d:'Deliberate exaggeration. Witnesses are great for this.',x:'Unluckiest Man in the World'},
+slang:{n:'Colloquial slang',d:'Informal words and nicknames.',x:'Wills and Kate Jet Off'},
+pun:{n:'Pun',d:'Word play for humour.',x:'Wages Frozen for Ice-Cream Sellers'},
+question:{n:'Rhetorical question',d:'A question asked for effect. Start with a question word and end with ?',x:'Is this lake cursed?'},
+allusion:{n:'Allusion',d:'An indirect reference to something famous, like a fairy tale or film.',x:'Love rat Ricky is no Romeo!'},
+rhyme:{n:'Rhyme',d:'Matching word endings.',x:"Queen's Green Anger"}};
+const POOL=[
+{h:'Storm Strikes Stornoway',d:'alliteration'},{h:'Pupils Prefer Pizza',d:'alliteration'},
+{h:'Scooby Doom: dog blows up house with can of deodorant',d:'pun'},{h:'Wages Frozen for Ice-Cream Sellers',d:'pun'},
+{h:'Separation anxiety affects 85% of dogs',d:'statistic'},{h:'68% drop in Wildlife Populations',d:'statistic'},
+{h:'Unluckiest Man in the World',d:'hyperbole'},{h:'Baked Britain',d:'hyperbole'},
+{h:'Wills and Kate Jet Off',d:'slang'},{h:'Love rat Ricky is no Romeo!',d:'allusion'},
+{h:'Is this lake cursed?',d:'question'},{h:"Queen's Green Anger",d:'rhyme'}];
+const GLUE=['A','The','In','On','At','Of','To','And','Is','Are','After','With','For','By','From','Into','Not','Up','This','Who','Why','What','Can','Has','Did','How'];
+const PUNCT=['!','?',':',','];
+const QW=['who','why','what','can','has','did','how','is','are','will','does'];
+const NM=[
+['Gonzo','Swamp','Neon','Rad','Captain','Mangrove','Turbo','Salty','Sneaky','Bayou','Wild','Cosmic','Rusty','Lucky','Dizzy','Midnight','Sunny','Crafty','Brave','Spicy'],
+['Gator','Croc','Pelican','Heron','Manatee','Raccoon','Emu','Parrot','Flamingo','Otter','Iguana','Armadillo','Panther','Possum','Toucan','Mongoose','Lizard','Turtle','Stork','Pigeon']];
+const SKIN=['#f6d0b0','#e8b088','#c98e62','#9a6540','#6b4228'],HAIR=['#1e1410','#4a2e1c','#9a5a22','#d9b35a','#c4382c','#6b4fd8'],SHIRT=['#ff3d8b','#1de9d2','#ffd23f','#ff8a3d','#6b8cff','#a6ff5c'];
+/* clues. t: fact | rumour | junk. Students never see t, only the source. */
+let CLUES={
+F1:{src:'Hank Boggs, head keeper. He found the empty enclosure.',t:'fact',txt:'Gus, a 2.4 m alligator, escaped his enclosure at Gator Gulch Zoo on Tuesday.',tiles:['Gus','Gator','Gulch','Escapes','Alligator']},
+F4:{src:'Hank Boggs, head keeper.',t:'fact',txt:'Nobody was hurt, but the toy flamingo is gone for good.',tiles:['Unhurt','Gone']},
+F2:{src:'Marcy, gift shop manager. She saw it happen.',t:'fact',txt:'Gus wandered into the gift shop and gobbled a stuffed toy flamingo.',tiles:['Gobbles','Gift-Shop','Flamingo','Toy']},
+F3:{src:'Marcy, gift shop manager. She watched the keepers arrive.',t:'fact',txt:"Keepers found Gus napping in the shop's inflatable pool.",tiles:['Keepers','Napping','Inflatable','Pool']},
+R1:{src:'Randy Pike, a tourist. He watched from across the car park.',t:'rumour',txt:"Randy swears Gus was 'as big as a bus'.",tiles:['Bus-Sized','Monster']},
+R2:{src:'Lenny, snack vendor. It is only his theory.',t:'rumour',txt:"Lenny says Gus had been 'plotting a great escape' for months.",tiles:['Mastermind','Plotting']},
+J1:{src:'The entrance information board.',t:'junk',txt:'The zoo opens at 9 am and tickets cost $12.',tiles:['Opens','Tickets']},
+J2:{src:'Lenny, snack vendor. He was joking.',t:'junk',txt:"Lenny joked the gift shop was 'a snappy place to shop'.",tiles:['Snappy|p','Shopping']}};
+const LEVEL1={id:1,name:'Gator Gulch Zoo',place:'Roadside zoo',dev:['alliteration'],
+ title:['Tuesday, 8:15 AM','Gator Gulch Zoo'],
+ call:[
+  {t:"Rookie! You awake? Doesn't matter. Get dressed.",ch:["On my way, boss.","It's barely eight in the morning..."]},
+  {t:"Gator Gulch Zoo. Something big walked out of its enclosure this morning. Big as in two-point-four metres of teeth."},
+  {t:"Talk to everyone. Check everything. Staff, tourists, the guy selling corn dogs. All of them."},
+  {t:"But listen. Not everyone tells the truth. Some people guess. Some exaggerate. Some just love the sound of their own voice."},
+  {t:"So here's the rule. Anything you put in that notebook has to hold up. If you can't trust where it came from, leave it out."},
+  {t:"Get me the facts and I'll get you a front page. Mags out."}],
+ reply:["That's the spirit. Now move.","Eight? That's practically lunch. Move!"],
+ filecall:"Time's ticking, rookie. Let's see what you've got. This one needs alliteration: three or more words that start with the same sound. Make it bite."};
+/* people and places. Coordinates are tiles, feet-centred. */
+const ZOO={
+ npcs:[
+ {id:'doreen',name:'Doreen',x:15.5,y:25.2,dir:'d',st:{skin:'#d9a074',hair:'#c9c9d8',shirt:'#e07b9a',pants:'#5a4a7a',acc:'visor'},
+  lines:["Welcome to Gator Gulch! Well. Gator Gulch, minus one gator.","You must be the press. Mags called ahead. Said you'd be young, keen and hopefully caffeinated.","Go and find Hank, our head keeper. He's down by the gator pond. Hasn't stopped muttering since sunrise.","And mind the flamingos, hon. A few got loose in all the fuss and they're in a mood. They charge. Also, the mud's slippery. Watch the shiny puddles."],again:["Hank's by the gator pond, hon. Follow the path."],clues:[]},
+ {id:'hank',name:'Hank Boggs',x:12.4,y:14.3,dir:'l',st:{skin:'#c98e6a',hair:'#7a6a3a',shirt:'#b5a35a',pants:'#4a5a3a',hat:'#7a6a3a',acc:'clip'},
+  lines:["Hank Boggs, head keeper. Twenty years on the job and I've never lost an animal. Until today.",{clue:'F1'},"We got him back, thank goodness. He's a gentle old fella, really.",{clue:'F4'},"Gus is a creature of comfort, mind. Soft cushions, warm spots. If that gator ever gets out again, check somewhere cosy.","Follow the mud trail if you want the full story. Marcy at the gift shop saw the lot."],again:["The mud trail leads to the gift shop. Go on, rookie."],clues:['F1','F4']},
+ {id:'marcy',name:'Marcy',zone:'shop',r:2.3,x:8.5,y:4.3,dir:'d',st:{skin:'#f0c8a0',hair:'#5a2a1a',shirt:'#1aa89a',pants:'#2a3a4a',acc:'apron'},
+  lines:["Oh, thank goodness, a person who isn't a vet! I'm Marcy. I run the gift shop.","I opened early for the Sunrise Safari crowd, and there he was. Gus. Strolling down aisle two like it was the weekly shop.",{clue:'F2'},"Then he flopped into that inflatable pool by the window like it was a holiday.",{clue:'F3'},"Customers think it's the funniest thing ever. I'm still shaking."],again:["Have a look at the pool. Mind the mud."],clues:['F2','F3']},
+ {id:'randy',name:'Randy',x:25.6,y:20.6,dir:'r',st:{skin:'#e8b098',hair:'#e8b098',shirt:'#ff6b35',pants:'#3a7ac8',hat:'#f4e4a8',acc:'shades'},
+  lines:["Randy Pike! Sunrise Safari, best forty bucks I ever spent!","I saw the whole thing from across the car park. Way across. Didn't bring my glasses.",{clue:'R1'},"Biggest gator in the HISTORY of gators. You can quote me!"],again:["Still the biggest gator in history. Write that down!"],clues:['R1']},
+ {id:'lenny',name:'Lenny',x:10.4,y:19.4,dir:'l',st:{skin:'#8d5a3c',hair:'#1a1210',shirt:'#f4f4f4',pants:'#3a3a3a',hat:'#fff',acc:'apron'},
+  lines:["Swamp Snacks! Best corn dogs in the Gulch. Free if you tell the paper I said so.","Between you and me? That gator planned this. Been eyeing that fence for months.",{clue:'R2'},"And that gift shop? Ha! A snappy place to shop, if you ask me.",{clue:'J2'}],again:["Corn dog? No? Suit yourself."],clues:['R2','J2']},
+ {id:'gwen',name:'Gwen',x:22.8,y:21.2,dir:'d',st:{skin:'#f6d0b0',hair:'#d9b35a',shirt:'#6b8cff',pants:'#f4f4f4',acc:'shades'},wander:[[22.8,21.2],[17,21.2]],
+  lines:["Is it true there's a gator in the gift shop? I paid for a safari, not a soap opera."],again:["Still no gator on my safari!"],clues:[]},
+ {id:'tia',name:'Tia',x:26.4,y:21.4,dir:'l',st:{skin:'#c98e62',hair:'#1e1410',shirt:'#ffd23f',pants:'#ff3d8b',acc:'none',kid:1},
+  lines:["Dad says it was huge. I think it was kinda small. And sleepy."],again:["Small. And sleepy."],clues:[]}],
+ spots:[
+ {id:'board',x:23.5,y:23.4,name:'Information board',lines:["A weathered noticeboard. Zoo information, mostly.",{clue:'J1'}],again:["Opening hours and ticket prices. Riveting."],clues:['J1']},
+ {id:'placard',x:8.5,y:10.4,name:'Enclosure placard',lines:["GUS. American alligator. Age 31. 'Please do not tap the glass.' Someone has added a sticker: 'He bites back.'"]},
+ {id:'latch',x:9.6,y:12.3,name:'Broken fence',lines:["The latch is bent like a pretzel. Mud everywhere. Something heavy came through here."]},
+ {id:'crate',x:15,y:18.4,name:'Transport crate',lines:["Gus's temporary crate. A sleepy snout peeks out. He looks smug."]}],
+ caps:[
+ {x:19.5,y:27,w:2,h:2,t:"Gator Gulch Zoo. Palm trees, popcorn and one very empty enclosure."},
+ {x:6,y:10.5,w:7,h:3,t:"The gator pond. Quiet. Too quiet."},
+ {x:27,y:11.5,w:8,h:2.5,t:"Gator Gifts. Smells like sunscreen and bad decisions."}],
+ shopSpots:[
+ {id:'pool',x:13.4,y:10.3,name:'Inflatable pool',lines:["A kiddie pool, squashed flat, with big muddy claw prints all over it. A soggy flamingo foot floats in the middle. Ew."]},
+ {id:'plush',x:2.4,y:5.6,name:'Plush shelf',lines:["A shelf of toy animals. There's a gap with a tag reading 'FLAMINGO $14.99'. No flamingo."]},
+ {id:'poster',x:14.6,y:5.5,name:'Poster',lines:["'2 FOR 1 GATOR PLUSH! Offer ends when we run out of gators.'"]}]};
+/* pixel people. x,y = feet centre in screen px; u = px per sprite unit (1/32 tile) */
+function drawChar(c,x,y,u,st,dir,fr,talk){
+ const R=(a,b,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x+a*u),Math.round(y+b*u),Math.ceil(w*u),Math.ceil(h*u))};
+ const k=st.kid?.8:1,H=(v)=>v*k;
+ const sw=fr===1?-2:fr===3?2:0,bob=fr%2?-.6:0;
+ c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(x,y+u,9*u*k,3.4*u*k,0,0,7);c.fill();
+ const skin=st.skin,side=dir==='l'||dir==='r',fl=dir==='l'?-1:1;
+ // legs
+ const lw=side?5:4.5;
+ R(side?-3:-5.5,H(-9),lw,H(9)+(fr===1?-2:0),st.pants);R(side?-2:1,H(-9),lw,H(9)+(fr===3?-2:0),st.pants);
+ R(side?-3:-5.5,-1.5,lw+.5,2,'#2a1f2e');R(side?-2:1,-1.5,lw+.5,2,'#2a1f2e');
+ // torso
+ const ty=H(-20)+bob*u/u,tw=side?11:14;
+ R(-tw/2,ty,tw,H(12),st.shirt);
+ if(st.acc==='apron')R(-tw/2+2,ty+3,tw-4,H(9),'rgba(255,255,255,.75)');
+ if(st.acc==='badge'&&dir!=='u')R(1,ty+3,4,3,'#1de9d2');
+ if(st.acc==='clip'&&dir!=='u')R(-6,ty+3,6,7,'#f4efe0');
+ // arms
+ if(!side){R(-tw/2-2.5,ty+1+sw,3,H(9),skin);R(tw/2-.5,ty+1-sw,3,H(9),skin)}
+ else R(-1.5,ty+1+sw,3,H(9),skin);
+ // head
+ const hy=H(-30);R(-5,hy,10,H(10),skin);
+ if(dir!=='u'){c.fillStyle='#1a1020';if(side){c.fillRect(Math.round(x+(fl*2.5-.8)*u),Math.round(y+(hy+4)*u),Math.ceil(1.8*u),Math.ceil(2*u))}else{c.fillRect(Math.round(x-3.2*u),Math.round(y+(hy+4)*u),Math.ceil(1.8*u),Math.ceil(2*u));c.fillRect(Math.round(x+1.4*u),Math.round(y+(hy+4)*u),Math.ceil(1.8*u),Math.ceil(2*u))}
+  if(talk&&Math.floor(talk*8)%2)R(-1.5,hy+7.2,3,1.5,'#7a2030')}
+ // hair
+ const hs=st.hs||0;
+ if(st.hair!==skin){R(-5.5,hy-1.5,11,3.5,st.hair);if(dir==='u')R(-5.5,hy,11,H(8),st.hair);else if(side)R(fl>0?-5.5:2.5,hy,3,H(5),st.hair);else{R(-5.5,hy,2,H(4),st.hair);R(3.5,hy,2,H(4),st.hair)}
+  if(hs===1){if(dir==='u')R(-6,hy,12,H(17),st.hair);else if(side)R(fl>0?-6.5:2.5,hy,4,H(15),st.hair);else{R(-6.5,hy,2.5,H(15),st.hair);R(4,hy,2.5,H(15),st.hair)}}
+  else if(hs===2){if(dir==='u')R(-1.5,hy+3,3,H(12),st.hair);else if(side)R(fl>0?-8.5:5.5,hy+2,3,H(11),st.hair);else R(4.5,hy+1,2.5,H(8),st.hair)}
+  else if(hs===3){R(-7,hy-3.5,14,5,st.hair);R(-7,hy,2.5,H(6),st.hair);R(4.5,hy,2.5,H(6),st.hair);if(dir==='u')R(-7,hy,14,H(10),st.hair)}
+  else if(hs===4)R(-2.5,hy-6,5,4.5,st.hair)}
+ if(st.acc==='shades'&&dir!=='u')R(side?(fl>0?0:-5):-5,hy+3.2,side?5:10,2.2,'#1a1020');
+ if(st.ht==='cap'){R(-5.5,hy-3.5,11,3.5,st.hat);if(dir==='d')R(-6.5,hy-.5,13,2,st.hat);else if(side)R(fl>0?3:-9,hy-.5,6,2,st.hat)}
+ else if(st.hat){R(-7,hy-2.5,14,2.5,st.hat);R(-4.5,hy-6,9,4.2,st.hat)}
+ if(st.acc==='visor')R(-6.5,hy-1,13,2.5,'#e04060');
+}
+/* head and shoulders for dialogue boxes. w = canvas size */
+function drawBust(cv,st){
+ const c=cv.getContext('2d'),w=cv.width,u=w/48;c.clearRect(0,0,w,w);c.imageSmoothingEnabled=false;
+ const R=(x,y,a,b,col)=>{c.fillStyle=col;c.fillRect(Math.round(x*u),Math.round(y*u),Math.ceil(a*u),Math.ceil(b*u))};
+ c.fillStyle='#4a3a8a';c.fillRect(0,0,w,w);
+ R(8,36,32,14,st.shirt);if(st.acc==='apron')R(14,38,20,12,'rgba(255,255,255,.75)');
+ R(13,8,22,26,st.skin);
+ if(st.hair!==st.skin){const hs=st.hs||0;R(11,5,26,9,st.hair);R(11,9,4,16,st.hair);R(33,9,4,16,st.hair);if(st.bob||hs===1){R(9,9,6,28,st.hair);R(33,9,6,28,st.hair)}
+  if(hs===2){R(35,12,6,5,st.hair);R(37,16,5,16,st.hair)}if(hs===3){R(8,3,32,10,st.hair);R(8,9,6,14,st.hair);R(34,9,6,14,st.hair)}if(hs===4)R(19,-1,10,7,st.hair)}
+ R(18,20,3,3,'#1a1020');R(28,20,3,3,'#1a1020');R(21,29,7,2,'#7a2030');
+ if(st.acc==='shades')R(15,19,20,5,'#1a1020');
+ if(st.acc==='glasses'){c.strokeStyle=st.glass||'#ff3d8b';c.lineWidth=Math.max(2,u);c.strokeRect(16*u,18*u,8*u,7*u);c.strokeRect(25*u,18*u,8*u,7*u);R(24,21,1,1,st.glass||'#ff3d8b')}
+ if(st.ht==='cap'){R(10,4,28,6,st.hat);R(8,9,32,3,st.hat)}
+ else if(st.hat){R(9,4,30,4,st.hat);R(14,-1,20,7,st.hat)}
+ if(st.acc==='visor')R(10,10,28,4,'#e04060');
+}
+const HS=['Short hair','Long hair','Ponytail','Curly hair','Top bun'],HD=['No hat','Press cap','Straw hat'];
+const PLAYER=()=>({skin:SKIN[S.av[0]],hair:HAIR[S.av[1]],shirt:SHIRT[S.av[2]],pants:'#2a1f6b',hs:S.av[3],hat:[null,'#2a6bd8','#fff7e0'][S.av[4]]||null,ht:S.av[4]===1?'cap':'',acc:'badge'});
+const MAGS={skin:'#d9a67e',hair:'#b9b9c9',shirt:'#c4162a',acc:'glasses',glass:'#ff3d8b',bob:1};
+/* hazard critters, drawn in pixels so they never look washed out. x,y = feet centre, u = px per unit, fl = 1 faces right */
+function drawRogue(c,k,x,y,u,fl,t,st){
+ const R=(a,b,w,h,col)=>{const X=fl>0?a:-a-w;c.fillStyle=col;c.fillRect(Math.round(x+X*u),Math.round(y+b*u),Math.ceil(w*u),Math.ceil(h*u))};
+ const f=Math.floor(t*(st==='charge'?14:5))%2,ch=st==='charge';
+ c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(x,y,9*u,3*u,0,0,7);c.fill();
+ if(k==='flamingo'){
+  R(-1,-12,1.4,12,'#ff8ab3');R(2,-12,1.4,12-(f?3:0),'#ff8ab3');
+  R(-8,-21,15,9,'#ff6fa5');R(-6,-23,11,3,'#ff7fb0');R(-11,-19,4,6,'#ff4f90');R(-5,-19,8,5,'#ff4f90');
+  R(5,-34+(ch?5:0),3.2,15,'#ff6fa5');R(5,-37+(ch?5:0),6,4,'#ff6fa5');R(10,-36+(ch?5:0),4,2.4,'#222');R(8,-36.4+(ch?5:0),1.2,1.2,'#fff');
+  if(ch){R(-9,-27,5,7,'#ff4f90')}}
+ else if(k==='gull'){
+  R(-1,-8,1.3,8,'#ff9a2a');R(3,-8,1.3,8-(f?2:0),'#ff9a2a');
+  R(-7,-15,13,8,'#f4f4f4');R(-4,-15+(f?-2:0),9,3,'#c8ccd6');R(-10,-14,4,4,'#c8ccd6');R(5,-19,5,5,'#fff');R(9,-17,4.5,2,'#ff9a2a');R(8,-18.2,1.2,1.2,'#222');
+  if(ch)R(-8,-22,16,3,'#c8ccd6')}
+ else if(k==='cart'){
+  R(-12,-17,24,11,'#c8ccd6');R(-12,-17,24,2,'#8a8f9a');for(let i=0;i<5;i++)R(-10+i*5,-15,1,8,'#8a8f9a');
+  R(-6,-21,4,5,'#ff7a3a');R(0,-21,4,4,'#a6ff5c');R(-14,-22,3,10,'#8a8f9a');R(-14,-22,6,2,'#8a8f9a');R(-9,-6,4,4,'#222');R(6,-6,4,4,'#222')}
+ else if(k==='dog'){
+  const lg=f?1.5:0;R(-8,-6,3,6-lg,'#8a5528');R(-2,-6,3,6,'#8a5528');R(3,-6,3,6-lg,'#8a5528');R(6,-6,3,6,'#8a5528');
+  R(-10,-15,18,9,'#b5733a');R(6,-19,8,8,'#c98542');R(7,-21,3,5,'#6a3c1a');R(13,-16,3.4,3.4,'#3a2a1a');R(10,-17.4,1.3,1.3,'#111');R(-14,-18,5,3,'#b5733a');
+  if(ch)R(11,-12,3,2,'#ff5a6a')}
+ else if(k==='ball'){
+  const a=t*(ch?9:3)*(fl>0?1:-1);c.fillStyle='#fff';c.beginPath();c.arc(x,y-8*u,8*u,0,7);c.fill();c.strokeStyle='#c8ccd6';c.lineWidth=Math.max(1,u);c.stroke();
+  c.fillStyle='#b9bfcc';for(let i=0;i<4;i++){const an=a+i*1.6;c.beginPath();c.arc(x+Math.cos(an)*4*u,y-8*u+Math.sin(an)*4*u,1.2*u,0,7);c.fill()}}
+ else if(k==='raccoon'){
+  const lg=f?1.5:0;R(-7,-5,3,5-lg,'#4a4e58');R(2,-5,3,5,'#4a4e58');
+  R(-9,-12,15,8,'#8a8f9a');R(5,-15,8,7,'#a0a4ae');R(6,-17,2.5,3,'#4a4e58');R(11,-17,2.5,3,'#4a4e58');R(6,-13,7,2.4,'#222');R(12,-12,3,3,'#222');
+  R(-16,-12,8,4,'#6a6f7a');R(-14,-12,1.6,4,'#222');R(-11,-12,1.6,4,'#222')}
+ else if(k==='bat'){
+  const fl2=f?-3:3;c.fillStyle='#3a2a4a';R(-3,-27,6,6,'#3a2a4a');R(-4,-29,2,3,'#3a2a4a');R(2,-29,2,3,'#3a2a4a');R(-13,-26+fl2,10,4,'#4a3a5a');R(3,-26+fl2,10,4,'#4a3a5a');R(-1,-25,1.2,1.2,'#ff4060');R(1,-25,1.2,1.2,'#ff4060');
+  c.fillStyle='rgba(0,0,0,.18)'}
+}
+/* world builder: draws every static thing once into two canvases (ground, over) at 32px per tile */
+const TS=32;
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function newWorld(w,h,seed,base){
+ const mk=()=>{const c=document.createElement('canvas');c.width=w*TS;c.height=h*TS;return c};
+ const W={w,h,t:[],s:[],gc:mk(),oc:mk(),r:rng(seed),water:[],flam:[]};
+ W.g=W.gc.getContext('2d');W.o=W.oc.getContext('2d');
+ for(let y=0;y<h;y++){W.t.push(Array(w).fill(base||'g'));W.s.push(Array(w).fill(0))}
+ return W}
+const area=(W,x,y,w,h,t,sol)=>{for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||j<0||i>=W.w||j>=W.h)continue;if(t)W.t[j][i]=t;if(sol!==undefined)W.s[j][i]=sol}};
+const sol=(W,x,y,w=1,h=1)=>area(W,x,y,w,h,null,1);
+const tt=(W,x,y)=>(W.t[y]&&W.t[y][x])||'x';
+function shadow(c,x,y,rx,ry,a){c.fillStyle='rgba(0,0,0,'+(a||.22)+')';c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.fill()}
+function paintTerrain(W){
+ const c=W.g,r=W.r,px=(X,Y,w,h,col)=>{c.fillStyle=col;c.fillRect(X,Y,w,h)};
+ for(let y=0;y<W.h;y++)for(let x=0;x<W.w;x++){
+  const t=W.t[y][x],X=x*TS,Y=y*TS;
+  if(t==='g'){px(X,Y,TS,TS,(x+y)&1?'#5cab4b':'#57a548');
+   for(let i=0;i<6;i++)px(X+(r()*29|0),Y+(r()*28|0),2,3,r()<.5?'#4a9440':'#69b85a');
+   if(r()<.08)px(X+(r()*28|0),Y+(r()*28|0),3,3,['#ffd23f','#fff','#ff7ab0'][r()*3|0])}
+  else if(t==='p'){px(X,Y,TS,TS,'#dcc89d');px(X,Y+15,TS,1,'#c9b383');px(X+((y&1)?8:20),Y,1,16,'#c9b383');px(X+((y&1)?20:8),Y+16,1,16,'#c9b383');
+   for(let i=0;i<4;i++)px(X+(r()*30|0),Y+(r()*30|0),2,2,'rgba(120,90,50,.2)');
+   if(tt(W,x,y-1)==='g')px(X,Y,TS,2,'#b49c68');if(tt(W,x,y+1)==='g')px(X,Y+TS-2,TS,2,'#b49c68');if(tt(W,x-1,y)==='g')px(X,Y,2,TS,'#b49c68');if(tt(W,x+1,y)==='g')px(X+TS-2,Y,2,TS,'#b49c68')}
+  else if(t==='s'){px(X,Y,TS,TS,'#ecd9a2');for(let i=0;i<7;i++)px(X+(r()*30|0),Y+(r()*30|0),2,2,'#d6bd83')}
+  else if(t==='w'){px(X,Y,TS,TS,'#2c8fd1');px(X+4+(r()*10|0),Y+6+(r()*8|0),10,2,'rgba(255,255,255,.28)');px(X+10+(r()*8|0),Y+20,12,2,'rgba(255,255,255,.2)');
+   if(tt(W,x,y-1)!=='w')px(X,Y,TS,4,'#1e6fa8');if(tt(W,x,y+1)!=='w')px(X,Y+TS-4,TS,4,'#5db4ec');if(tt(W,x-1,y)!=='w')px(X,Y,4,TS,'#1e6fa8');if(tt(W,x+1,y)!=='w')px(X+TS-4,Y,4,TS,'#1e6fa8');
+   if(r()<.25)W.water.push([x,y,r()*6])}
+  else if(t==='a'){px(X,Y,TS,TS,'#3a3a48');for(let i=0;i<8;i++)px(X+(r()*30|0),Y+(r()*30|0),2,2,r()<.5?'#46465a':'#2f2f3a')}
+  else if(t==='z'){px(X,Y,TS,TS,(x+y)&1?'#ecd0b8':'#e2c0a4');px(X,Y,TS,1,'rgba(0,0,0,.08)');px(X,Y,1,TS,'rgba(0,0,0,.08)')}
+  else if(t==='f'){px(X,Y,TS,TS,(x+y)&1?'#f2ecd8':'#a8dcd4');px(X,Y,TS,1,'rgba(0,0,0,.07)')}
+  else if(t==='v'){px(X,Y,TS,TS,'#3b3558');px(X,Y+TS-4,TS,4,'#251f3a');px(X,Y,TS,3,'#5a5480');for(let i=0;i<3;i++)px(X+i*11+((y&1)*5),Y+8+i*8,9,1,'rgba(255,255,255,.07)')}
+  else if(t==='q'){px(X,Y,TS,TS,(x+y)&1?'#35c15f':'#2fb458');for(let i=0;i<5;i++)px(X+(r()*29|0),Y+(r()*28|0),2,3,r()<.5?'#2aa550':'#46d26f')}
+  else if(t==='n'){px(X,Y,TS,TS,(x+y)&1?'#c9a46a':'#c19b60');for(let i=0;i<7;i++)px(X+(r()*30|0),Y+(r()*30|0),2,2,r()<.5?'#a8844a':'#dcb87c')}
+  else if(t==='k'){px(X,Y,TS,TS,'#6b4a38');px(X,Y+10,TS,1,'#573a2a');px(X,Y+21,TS,1,'#573a2a');px(X+8+((y&1)*10),Y,1,10,'#573a2a')}
+ }}
+function mud(W,pts,wd){const c=W.g,r=W.r;
+ for(let i=0;i<pts.length-1;i++){const[a,b]=pts[i],[a2,b2]=pts[i+1],n=Math.ceil(Math.hypot(a2-a,b2-b)*5);
+  for(let s=0;s<=n;s++){const x=(a+(a2-a)*s/n)*TS,y=(b+(b2-b)*s/n)*TS;c.fillStyle='rgba(88,58,30,.8)';c.beginPath();c.ellipse(x+(r()-.5)*6,y+(r()-.5)*6,(wd||7)+r()*3,(wd||7)*.7+r()*2,0,0,7);c.fill();
+   if(s%3===0){c.fillStyle='rgba(60,38,18,.7)';c.fillRect(x-1,y-1+(r()*8-4),9,2)}}}}
+function tree(W,x,y,palm){
+ sol(W,x,y);const g=W.g,o=W.o,X=x*TS+16,Y=y*TS+30,r=W.r;shadow(g,X+4,Y,palm?15:19,6);
+ if(palm){g.fillStyle='#8a5a2e';g.fillRect(X-3,Y-26,6,26);g.fillStyle='#6e4522';for(let i=0;i<5;i++)g.fillRect(X-3,Y-5-i*5,6,1);
+  g.fillStyle='#8a5a2e';g.fillRect(X-2,Y-52,5,26);o.fillStyle='#8a5a2e';o.fillRect(X-2,Y-58,5,8);
+  const cx=X,cy=Y-58;for(let a=0;a<8;a++){const an=a*Math.PI/4+.2,lx=Math.cos(an),ly=Math.sin(an)*.55;
+   o.strokeStyle=a%2?'#2f8a3a':'#3ea34a';o.lineWidth=5;o.lineCap='round';o.beginPath();o.moveTo(cx,cy);o.quadraticCurveTo(cx+lx*22,cy+ly*22-10,cx+lx*40,cy+ly*40+(ly>0?6:12));o.stroke()}
+  o.fillStyle='#7a5a2a';o.beginPath();o.arc(cx,cy+2,4,0,7);o.fill()}
+ else{g.fillStyle='#6a4326';g.fillRect(X-5,Y-20,10,20);g.fillStyle='#4f3019';g.fillRect(X-5,Y-20,3,20);
+  const cy=Y-48,sh=r()<.5?0:1;[[0,0,27,'#2c7a3a'],[-6,-4,21,'#369448'],[5,-8,17,'#45ab55'],[-3,-12,10,'#58c066']].forEach(([dx,dy,rr,col])=>{o.fillStyle=col;o.beginPath();o.arc(X+dx,cy+dy,rr,0,7);o.fill()})}}
+function fence(W,x0,y0,x1,y1,gaps){
+ const g=W.g;gaps=gaps||[];
+ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+  if(x!==x0&&x!==x1&&y!==y0&&y!==y1)continue;
+  const gp=gaps.find(q=>q[0]===x&&q[1]===y),X=x*TS,Y=y*TS,hor=(y===y0||y===y1);
+  if(gp){g.fillStyle='rgba(88,58,30,.8)';g.beginPath();g.ellipse(X+16,Y+16,15,10,0,0,7);g.fill();g.fillStyle='#9a6b3a';g.save();g.translate(X+8,Y+22);g.rotate(-.9);g.fillRect(0,0,24,4);g.restore();g.fillRect(X+22,Y+8,6,14);continue}
+  sol(W,x,y);shadow(g,X+16,Y+30,15,3,.18);
+  g.fillStyle='#9a6b3a';
+  if(hor){g.fillRect(X,Y+13,TS,3);g.fillRect(X,Y+21,TS,3);g.fillStyle='#7a5226';g.fillRect(X+12,Y+8,6,22);g.fillStyle='#b8834a';g.fillRect(X+12,Y+8,6,2)}
+  else{g.fillRect(X+13,Y,6,TS);g.fillStyle='#b8834a';g.fillRect(X+13,Y,2,TS);g.fillStyle='#7a5226';g.fillRect(X+8,Y+10,16,3);g.fillRect(X+8,Y+21,16,3)}}}
+function sign(c,text,cx,cy,w,h,bg,fg,fs){c.fillStyle=bg;c.fillRect(cx-w/2,cy-h/2,w,h);c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=2;c.strokeRect(cx-w/2+1,cy-h/2+1,w-2,h-2);
+ c.fillStyle=fg;c.font=(fs||18)+'px Bangers,Impact,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(text,cx,cy+1)}
+function building(W,x,y,w,h,o){
+ sol(W,x,y,w,h);const c=W.g,X=x*TS,Y=y*TS,Wd=w*TS,Ht=h*TS,rh=(o.rh||2)*TS;
+ shadow(c,X+Wd/2+8,Y+Ht+2,Wd/2+10,8,.25);
+ c.fillStyle=o.wall;c.fillRect(X,Y+rh,Wd,Ht-rh);
+ c.fillStyle='rgba(0,0,0,.08)';for(let i=0;i<(Ht-rh)/8;i++)c.fillRect(X,Y+rh+i*8,Wd,1);
+ c.fillStyle=o.roof;c.fillRect(X-4,Y,Wd+8,rh);c.fillStyle='rgba(0,0,0,.18)';for(let i=0;i<rh/8;i++)c.fillRect(X-4,Y+i*8+6,Wd+8,2);
+ c.fillStyle='rgba(0,0,0,.3)';c.fillRect(X-4,Y+rh-4,Wd+8,4);
+ (o.win||[]).forEach(wx=>{const wX=X+wx*TS+4,wY=Y+rh+8,ww=TS*(o.ww||1.4);c.fillStyle='#e8f6ff';c.fillRect(wX,wY,ww,TS*.9);c.fillStyle='#9ad4f2';c.fillRect(wX+3,wY+3,ww-6,TS*.9-6);c.fillStyle='rgba(255,255,255,.45)';c.fillRect(wX+5,wY+5,8,TS*.9-12);c.fillStyle='#fff';c.fillRect(wX+ww/2-1,wY,2,TS*.9)});
+ if(o.door!==undefined){const dX=X+o.door*TS,dY=Y+Ht-TS*1.5;c.fillStyle='#5a3a24';c.fillRect(dX+3,dY,TS-6,TS*1.5);c.fillStyle='#7a5234';c.fillRect(dX+6,dY+4,TS-12,TS*1.5-8);c.fillStyle='#ffd23f';c.fillRect(dX+TS-10,dY+TS*.75,3,3)}
+ if(o.awn){const aY=Y+rh,aw=o.awn[1]*TS,aX=X+o.awn[0]*TS;for(let i=0;i<aw/10;i++){c.fillStyle=i%2?'#fff':o.awnc||'#d6283b';c.fillRect(aX+i*10,aY+2,10,12)}c.fillStyle='rgba(0,0,0,.25)';c.fillRect(aX,aY+14,aw,3)}
+ if(o.sign)sign(c,o.sign,X+Wd/2,Y+rh*.5,Math.min(Wd-24,o.sw||200),rh*.62,o.sbg||'#1b3a2a',o.sfg||'#ffd23f',o.sfs||22)}
+function prop(W,k,x,y,a){
+ const g=W.g,X=x*TS,Y=y*TS;
+ if(k==='bench'){sol(W,x,y,2,1);shadow(g,X+32,Y+30,28,4);g.fillStyle='#7a5226';g.fillRect(X+4,Y+10,56,6);g.fillRect(X+4,Y+18,56,6);g.fillStyle='#4a3018';g.fillRect(X+6,Y+24,4,6);g.fillRect(X+54,Y+24,4,6);g.fillStyle='#b8834a';g.fillRect(X+4,Y+10,56,2)}
+ else if(k==='lamp'){sol(W,x,y);shadow(g,X+16,Y+30,10,3);g.fillStyle='#2a2a3a';g.fillRect(X+14,Y-26,4,56);g.fillStyle='#ffd966';g.fillRect(X+8,Y-34,16,10);g.fillStyle='rgba(255,217,102,.25)';g.beginPath();g.arc(X+16,Y-29,18,0,7);g.fill()}
+ else if(k==='bin'){sol(W,x,y);shadow(g,X+16,Y+30,10,3);g.fillStyle='#4a5a6a';g.fillRect(X+8,Y+8,16,22);g.fillStyle='#6a7a8a';g.fillRect(X+6,Y+5,20,5);g.fillStyle='#8fa';g.fillRect(X+11,Y+14,10,3)}
+ else if(k==='flower'){sol(W,x,y,a[0],a[1]);g.fillStyle='#6b4a2a';g.fillRect(X,Y+8,a[0]*TS,a[1]*TS-8);for(let i=0;i<a[0]*a[1]*9;i++){g.fillStyle=['#ff7ab0','#ffd23f','#fff','#ff6b35','#c88bff'][i%5];g.fillRect(X+W.r()*(a[0]*TS-4),Y+10+W.r()*(a[1]*TS-14),4,4)}}
+ else if(k==='picnic'){sol(W,x,y,2,1);shadow(g,X+32,Y+30,28,5);g.fillStyle='#8a5a2e';g.fillRect(X+4,Y+8,56,10);g.fillRect(X+8,Y+22,48,5);g.fillStyle='#d6283b';g.fillRect(X+4,Y+8,56,3);g.fillStyle='#4a3018';g.fillRect(X+10,Y+18,4,12);g.fillRect(X+50,Y+18,4,12)}
+ else if(k==='car'){sol(W,x,y,2,1);const col=a;shadow(g,X+32,Y+34,32,6,.3);g.fillStyle=col;g.fillRect(X+2,Y+4,60,26);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(X+2,Y+24,60,6);g.fillStyle='#bfe8ff';g.fillRect(X+14,Y-6,32,14);g.fillStyle=col;g.fillRect(X+10,Y-8,40,4);g.fillStyle='#bfe8ff';g.fillRect(X+16,Y-4,28,10);g.fillStyle='#1a1020';g.fillRect(X+8,Y+26,10,7);g.fillRect(X+46,Y+26,10,7);g.fillStyle='#fff7c0';g.fillRect(X+58,Y+10,4,5)}
+ else if(k==='cart'){sol(W,x,y,2,1);shadow(g,X+30,Y+32,26,5);g.fillStyle='#2f8a3a';g.fillRect(X+2,Y+8,56,18);g.fillStyle='#e8e8e8';g.fillRect(X+8,Y-4,34,4);g.fillRect(X+10,Y-4,3,14);g.fillRect(X+38,Y-4,3,14);g.fillStyle='#1a1020';g.fillRect(X+6,Y+22,10,8);g.fillRect(X+42,Y+22,10,8)}
+ else if(k==='crate'){sol(W,x,y,2,1);shadow(g,X+32,Y+32,28,5);g.fillStyle='#8a6a3a';g.fillRect(X+2,Y+4,60,26);g.fillStyle='#5a4220';g.fillRect(X+2,Y+4,60,4);for(let i=0;i<6;i++)g.fillRect(X+8+i*10,Y+8,3,22);g.fillStyle='#1a1020';g.fillRect(X+24,Y+12,18,10);g.fillStyle='#2f8a3a';g.fillRect(X+27,Y+14,12,6);g.fillStyle='#ffd23f';g.fillRect(X+31,Y+16,2,2);g.fillRect(X+35,Y+16,2,2)}
+ else if(k==='board'){sol(W,x,y,1,1);shadow(g,X+16,Y+30,13,3);g.fillStyle='#4a3018';g.fillRect(X+4,Y+6,4,26);g.fillRect(X+24,Y+6,4,26);g.fillStyle='#d9c9a0';g.fillRect(X-4,Y-14,40,24);g.fillStyle='#7a5226';g.strokeStyle='#7a5226';g.lineWidth=3;g.strokeRect(X-4,Y-14,40,24);g.fillStyle='#8a7a5a';for(let i=0;i<4;i++)g.fillRect(X+2,Y-8+i*5,28,2)}
+ else if(k==='placard'){sol(W,x,y,1,1);g.fillStyle='#3a3a4a';g.fillRect(X+6,Y+10,20,14);g.fillStyle='#d8d8e8';g.fillRect(X+8,Y+12,16,8)}
+ else if(k==='hat'){g.fillStyle=a}}
+function gate(W,x0,x1,y){
+ const g=W.g,o=W.o;[x0,x1].forEach(px=>{sol(W,px,y,1,1);const X=px*TS,Y=y*TS;shadow(g,X+18,Y+TS,16,5);g.fillStyle='#a8573a';g.fillRect(X+2,Y-24,28,56);g.fillStyle='#c8745a';g.fillRect(X+2,Y-24,28,6);g.fillStyle='rgba(0,0,0,.15)';for(let i=0;i<7;i++)g.fillRect(X+2,Y-18+i*8,28,1)});
+ const X0=x0*TS,X1=(x1+1)*TS;o.fillStyle='#2a8a4a';o.fillRect(X0+10,y*TS-40,X1-X0-20,26);o.fillStyle='rgba(0,0,0,.25)';o.fillRect(X0+10,y*TS-18,X1-X0-20,4);sign(o,'GATOR GULCH ZOO',(X0+X1)/2,y*TS-27,X1-X0-36,20,'#14602f','#ffd23f',20)}
+function buildZoo(){
+ const W=newWorld(40,30,11);
+ area(W,4,27,32,3,'a');area(W,14,22,12,5,'z');
+ area(W,18,3,4,19,'p');area(W,4,13,32,3,'p');area(W,30,10,3,4,'p');area(W,11,15,3,8,'p');area(W,22,18,6,2,'p');area(W,25,16,3,8,'p');
+ area(W,4,5,10,7,'s');area(W,6,5,6,4,'w',1);area(W,29,17,8,6,'w',1);
+ paintTerrain(W);
+ mud(W,[[9.5,10.8],[9.5,12.6],[9.8,14],[16,14.2],[24,14.3],[30,14],[31,12.5],[31.4,10.9]]);
+ fence(W,3,4,14,12,[[9,12],[10,12]]);
+ fence(W,28,16,37,23);
+ building(W,27,3,9,7,{wall:'#f0d9a8',roof:'#c4402e',rh:2.2,win:[1,6.2],ww:1.5,door:4,awn:[2.6,3.8],sign:'GATOR GIFTS',sw:190,sbg:'#14602f',sfg:'#ffd23f'});
+ building(W,4,17,6,4,{wall:'#ffe9a8',roof:'#1a9a8a',rh:1.8,win:[.6,3.5],ww:1.6,awn:[.3,5.4],awnc:'#ff7a2a',sign:'SWAMP SNACKS',sw:170,sbg:'#3a1a5a',sfg:'#ffd23f',sfs:19});
+ building(W,14,22,3,3,{wall:'#e8c8a0',roof:'#6b4fd8',rh:1.5,win:[.5],ww:1.5,awn:[.2,2.6],awnc:'#ffd23f',sign:'TICKETS',sw:70,sbg:'#2a1a5a',sfg:'#fff',sfs:16});
+ gate(W,17,22,25);
+ [[8,28,'#d6283b'],[12,28,'#2b86c9'],[26,28,'#f4f4f4'],[30,28,'#ffb02a']].forEach(([x,y,c])=>prop(W,'car',x,y,c));
+ prop(W,'board',23,22);prop(W,'placard',8,10);prop(W,'crate',14,17);prop(W,'cart',16,16);
+ prop(W,'bench',23,20);prop(W,'bench',28,11);prop(W,'bench',6,14);
+ [[17,12],[22,12],[29,11],[10,16],[17,23]].forEach(([x,y])=>prop(W,'lamp',x,y));
+ [[23,12],[34,10],[26,24]].forEach(([x,y])=>prop(W,'bin',x,y));
+ prop(W,'flower',16,3,[2,1]);prop(W,'flower',22,3,[2,1]);prop(W,'flower',15,19,[2,1]);prop(W,'picnic',6,22);
+ for(let y=0;y<30;y++)for(let x=0;x<40;x++)if(y<=1||x<=1||x>=38||y>=29)W.s[y][x]=1;
+ for(let x=1;x<39;x+=2){tree(W,x,1,x%4===1)}
+ for(let y=3;y<28;y+=3){tree(W,1,y,y%2===0);tree(W,38,y,y%2===1)}
+ [[17,5,1],[22,5,1],[17,9,1],[22,9,1],[17,17,1],[22,17,1],[3,16],[3,24],[12,25],[36,13],[34,25],[24,26,1],[5,2],[33,12],[27,13]].forEach(([x,y,p])=>{if(W.t[y][x]==='g'&&!W.s[y][x])tree(W,x,y,!!p)});
+ W.flam=[[30.5,18.8],[32.5,20.2],[34.5,18.6],[31.8,21.2],[35.2,21.0]];
+ return W}
+function buildShop(){
+ const W=newWorld(18,12,29,'f');
+ for(let y=0;y<12;y++)for(let x=0;x<18;x++)if(y<3||x===0||x===17||(y===11&&x!==8&&x!==9)){W.t[y][x]='k';W.s[y][x]=1}
+ paintTerrain(W);
+ const g=W.g,r=W.r;
+ // wall decor: window with light, posters, trim
+ g.fillStyle='#3a2a20';g.fillRect(0,2.6*TS,18*TS,6);
+ g.fillStyle='#e8f6ff';g.fillRect(1.2*TS,.4*TS,2.8*TS,1.9*TS);g.fillStyle='#ffe9b0';g.fillRect(1.3*TS,.5*TS,2.6*TS,1.7*TS);g.fillStyle='#fff';g.fillRect(2.6*TS,.4*TS,4,1.9*TS);
+ g.fillStyle='rgba(255,233,176,.22)';g.beginPath();g.moveTo(1.2*TS,3*TS);g.lineTo(4*TS,3*TS);g.lineTo(6.2*TS,8*TS);g.lineTo(2.6*TS,8*TS);g.fill();
+ sign(g,'GATOR GIFTS',9*TS,1.1*TS,6.4*TS,1.1*TS,'#14602f','#ffd23f',26);
+ g.fillStyle='#ffd23f';g.fillRect(13.2*TS,.5*TS,2.6*TS,1.9*TS);sign(g,'2 FOR 1',14.5*TS,1.0*TS,2.2*TS,.7*TS,'#d6283b','#fff',20);sign(g,'GATOR PLUSH!',14.5*TS,1.7*TS,2.3*TS,.5*TS,'#d6283b','#fff',13);
+ // rug
+ g.fillStyle='#b0243a';g.fillRect(6*TS,7*TS,6*TS,3*TS);g.fillStyle='#e8c05a';g.fillRect(6*TS+6,7*TS+6,6*TS-12,3*TS-12);g.fillStyle='#b0243a';g.fillRect(6*TS+14,7*TS+14,6*TS-28,3*TS-28);
+ // shelves
+ const shelf=(x,y,w,cols,gap)=>{sol(W,x,y,w,2);const X=x*TS,Y=y*TS;g.fillStyle='rgba(0,0,0,.25)';g.fillRect(X+2,Y+2*TS-2,w*TS,5);g.fillStyle='#8a5a30';g.fillRect(X,Y,w*TS,2*TS);g.fillStyle='#5a3a1c';g.fillRect(X,Y+TS-3,w*TS,5);g.fillRect(X,Y,w*TS,4);
+  for(let row=0;row<2;row++)for(let i=0;i<w*2;i++){if(gap&&row===0&&i===gap)continue;g.fillStyle=cols[(i+row*3)%cols.length];g.fillRect(X+4+i*16,Y+8+row*TS-1,12,18)}};
+ shelf(1,3,3,['#ff7ab0','#ffd23f','#6b8cff','#a6ff5c','#ff8a3d'],2);shelf(13,3,4,['#1de9d2','#ff3d8b','#ffd23f','#c88bff']);
+ g.fillStyle='#fff7c0';g.fillRect(2.9*TS,3.2*TS,.8*TS,.35*TS);sign(g,'$14.99',3.3*TS,3.35*TS,.9*TS,.4*TS,'#fff7c0','#7a1a1a',10);
+ // counter enclosure
+ sol(W,5,3,8,3);const cx=5*TS,cy=5*TS;g.fillStyle='#3a2a20';g.fillRect(cx,3*TS,8*TS,3*TS);g.fillStyle='#e8d8b8';g.fillRect(cx+4,3*TS+4,8*TS-8,2*TS-8);g.fillStyle='#8a5a30';g.fillRect(cx,5*TS,8*TS,TS);g.fillStyle='#b8834a';g.fillRect(cx,5*TS,8*TS,5);g.fillStyle='#2a2a3a';g.fillRect(cx+3.4*TS,4.55*TS,.9*TS,.7*TS);g.fillStyle='#8fe8c8';g.fillRect(cx+3.5*TS,4.6*TS,.7*TS,.25*TS);
+ g.fillStyle='#ff7ab0';g.fillRect(cx+6.2*TS,4.55*TS,.5*TS,.6*TS);g.fillStyle='#ffd23f';g.fillRect(cx+6.25*TS,4.45*TS,.4*TS,.15*TS);
+ // kiddie pool (squashed) with mud
+ sol(W,12,8,3,2);const px=12*TS,py=8*TS;shadow(g,px+1.5*TS,py+2*TS-4,1.7*TS,8);
+ g.fillStyle='#ff7ab0';g.beginPath();g.ellipse(px+1.5*TS,py+TS,1.6*TS,.95*TS,0,0,7);g.fill();g.fillStyle='#7ad0ff';g.beginPath();g.ellipse(px+1.5*TS,py+TS,1.3*TS,.7*TS,0,0,7);g.fill();
+ g.fillStyle='rgba(88,58,30,.75)';g.beginPath();g.ellipse(px+1.3*TS,py+TS,.9*TS,.45*TS,0,0,7);g.fill();
+ g.fillStyle='#ff9ac6';g.fillRect(px+2*TS,py+.5*TS,10,5);
+ mud(W,[[8.8,10.6],[9.4,9.9],[10.4,9.4],[11.6,9.1],[12.4,9]],5);
+ // door mat + plush toys on counter
+ g.fillStyle='#3a5a8a';g.fillRect(8*TS+2,10*TS+8,2*TS-4,TS-12);
+ W.flam=[];return W}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const S={real:'',nm:[0,0],av:[1,1,0,0,2],done:{},mute:false,gentle:false};
+const jname=()=>NM.map((a,i)=>a[S.nm[i]]).join(' ');
+const SCREENS=['title','setup','rules','cases','scene','play','desk','front'];
+let CUR=null,CI=0,G=null,D=null,raf=0,last=0,screen='title',toastT=0,typing=null;
+const DL={next:null,finish:null};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function show(n){screen=n;SCREENS.forEach(s=>$(s).hidden=s!==n);cancelAnimationFrame(raf);
+ if(n==='play'&&G){$('play').appendChild($('dlg'));fit();last=performance.now();raf=requestAnimationFrame(tick)}}
+function openM(html){$('sheet').innerHTML=html;$('modal').hidden=false;$('sheet').scrollTop=0}
+function closeM(){$('modal').hidden=true}
+function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2200)}
+/* sound: tiny synth, no files */
+const sfx=(()=>{let ac=null,rt=0;
+ const A=()=>{if(S.mute)return null;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();return ac}catch(e){return null}};
+ const tone=(f,t0,d,v,ty)=>{const a=A();if(!a)return;const o=a.createOscillator(),g=a.createGain(),n=a.currentTime+t0;o.type=ty||'sine';o.frequency.value=f;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v,n+.01);g.gain.linearRampToValueAtTime(0,n+d);o.connect(g);g.connect(a.destination);o.start(n);o.stop(n+d+.05)};
+ return{blip:()=>tone(500+Math.random()*90,0,.04,.025,'square'),ding:()=>{tone(880,0,.12,.07);tone(1320,.1,.22,.07)},no:()=>tone(190,0,.14,.05,'sawtooth'),slip:()=>{tone(720,0,.14,.06,'triangle');tone(420,.1,.14,.06,'triangle');tone(240,.2,.2,.06,'triangle')},honk:()=>{tone(330,0,.16,.07,'sawtooth');tone(250,.14,.22,.07,'sawtooth')},hit:()=>{tone(140,0,.3,.12,'square');tone(90,.1,.3,.1,'square')},
+  ring:()=>{clearInterval(rt);const p=()=>[0,.42].forEach(t=>{tone(440,t,.3,.06);tone(480,t,.3,.06)});p();rt=setInterval(p,1700)},stop:()=>clearInterval(rt)}})();
+/* fade + title cards */
+function fadeTo(on,card){$('tc').innerHTML=card?`<b>${esc(card[0])}</b><span>${esc(card[1])}</span>`:'';$('fade').classList.toggle('on',on);return wait(700)}
+function cap(t){const e=$('cap');e.textContent=t;e.style.transition='none';e.style.opacity=1;clearTimeout(cap.t);cap.t=setTimeout(()=>{e.style.transition='opacity .8s';e.style.opacity=0},3800)}
+/* input */
+const held={u:0,d:0,l:0,r:0};
+const pad=$('dpad');
+pad.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();try{b.setPointerCapture(e.pointerId)}catch(_){}held[b.dataset.d]=1;b.classList.add('on')});
+const rel=e=>{const b=e.target.closest('button');if(!b)return;held[b.dataset.d]=0;b.classList.remove('on')};
+['pointerup','pointercancel','lostpointercapture'].forEach(n=>pad.addEventListener(n,rel));
+pad.addEventListener('contextmenu',e=>e.preventDefault());
+const KM={ArrowUp:'u',w:'u',ArrowDown:'d',s:'d',ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r'};
+addEventListener('keydown',e=>{if(screen!=='play')return;const k=KM[e.key];if(k){held[k]=1;e.preventDefault()}else if(e.key===' '||e.key==='Enter'||e.key==='e'){if(!G.busy)interact();e.preventDefault()}});
+addEventListener('keyup',e=>{const k=KM[e.key];if(k)held[k]=0});
+addEventListener('blur',()=>{for(const k in held)held[k]=0});
+$('abtn').addEventListener('pointerdown',e=>{e.preventDefault();if(G&&!G.busy)interact()});
+/* world state */
+const solidAt=(W,x,y)=>{const r=W.s[Math.floor(y)];return !r||r[Math.floor(x)]!==0};
+function blocked(x,y){const r=.25,W=G.W;
+ if(solidAt(W,x-r,y-.05)||solidAt(W,x+r,y-.05)||solidAt(W,x-r,y+.12)||solidAt(W,x+r,y+.12))return true;
+ for(const n of G.npcs)if((n.zone||'zoo')===G.zone&&Math.hypot(n.x-x,n.y-y)<.55)return true;return false}
+function startLevel(){
+ const z0=CUR.start.zone,zones=CUR.build();
+ const npcs=CUR.npcs.map(n=>({...n,zone:n.zone||z0,fr:0,wi:1,pause:0,home:[n.x,n.y]})),spots=CUR.spots.map(s=>({...s,zone:s.zone||z0}));
+ G={zone:z0,zones,W:zones[z0],px:CUR.start.x,py:CUR.start.y,dir:CUR.start.dir||'u',walk:0,t:0,busy:false,notes:[],met:{},capSeen:{},npcs,spots,ctx:$('cv').getContext('2d'),T:48,cx:0,cy:0,cool:0,near:null,cred:S.gentle?5:3,maxCred:S.gentle?5:3,inv:0,slide:0,sv:[0,0],slipCool:0,flash:0,shake:0,pen:0,rang:false,ringPend:false,full:false,warned:0,slipSeen:0};
+ initHazards();updHud();show('play');fit();snapCam();
+}
+function fit(){
+ if(!G)return;const st=$('stage'),dpr=Math.min(2,window.devicePixelRatio||1),w=st.clientWidth*dpr,h=st.clientHeight*dpr;if(!w||!h)return;
+ const cv=$('cv');cv.width=Math.round(w);cv.height=Math.round(h);G.T=Math.max(32,Math.floor(Math.min(w/13,h/9)/8)*8);G.ctx.imageSmoothingEnabled=false;
+}
+addEventListener('resize',fit);
+if(window.ResizeObserver)new ResizeObserver(fit).observe($('stage'));
+function camTarget(){const cv=$('cv'),T=G.T,W=G.W,vw=cv.width/T,vh=cv.height/T;
+ let cx=G.px-vw/2,cy=G.py-vh/2-.4;
+ cx=W.w<=vw?(W.w-vw)/2:Math.max(0,Math.min(W.w-vw,cx));cy=W.h<=vh?(W.h-vh)/2:Math.max(0,Math.min(W.h-vh,cy));return[cx,cy]}
+function snapCam(){[G.cx,G.cy]=camTarget()}
+function tick(now){
+ if(screen!=='play'||!G)return;
+ const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();raf=requestAnimationFrame(tick);
+}
+function nearest(){let best=null,bd=9;
+ for(const e of [...G.npcs,...G.spots]){if(e.zone!==G.zone)continue;const d=Math.hypot(e.x-G.px,e.y-G.py);if(d<(e.r||1.5)&&d<bd){bd=d;best=e}}return best}
+function update(dt){
+ G.t+=dt;G.cool=Math.max(0,G.cool-dt);
+ if(G.ringPend&&!G.busy){G.ringPend=false;magsCall()}
+ if(!G.busy){
+  let dx=held.r-held.l,dy=held.d-held.u;
+  if(G.slide>0){hazSlide(dt)}else if((dx||dy)&&!(G.stun>0)){const m=Math.hypot(dx,dy),sp=3.5*dt;G.dir=Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u');dx=dx/m*sp;dy=dy/m*sp;
+   if(!blocked(G.px+dx,G.py))G.px+=dx;if(!blocked(G.px,G.py+dy))G.py+=dy;G.walk+=dt;G.moving=true}else{G.moving=false}
+  G.near=nearest();const nb=$('abtn');nb.classList.toggle('hot',!!G.near);nb.textContent=G.near?(G.npcs.includes(G.near)?'Talk':'Look'):'A';
+  for(const n of G.npcs){if(n.zone!==G.zone)continue;
+   const d=Math.hypot(n.x-G.px,n.y-G.py);
+   if(d<2.4){const ax=G.px-n.x,ay=G.py-n.y;n.dir=Math.abs(ax)>Math.abs(ay)?(ax>0?'r':'l'):(ay>0?'d':'u');n.fr=0;continue}
+   if(n.wander){if(n.pause>0){n.pause-=dt;n.fr=0}else{const tg=n.wander[n.wi],ax=tg[0]-n.x,ay=tg[1]-n.y,dd=Math.hypot(ax,ay);
+     if(dd<.1){n.wi=(n.wi+1)%n.wander.length;n.pause=2+Math.random()*3}else{n.x+=ax/dd*.8*dt;n.y+=ay/dd*.8*dt;n.dir=Math.abs(ax)>Math.abs(ay)?(ax>0?'r':'l'):(ay>0?'d':'u');n.fr=Math.floor(G.t*6)%4}}}}
+  hazUpdate(dt);
+  // doors and captions
+  CUR.caps.forEach((c,i)=>{if((c.z||CUR.start.zone)===G.zone&&!G.capSeen[i]&&G.px>c.x-c.w/2&&G.px<c.x+c.w/2&&G.py>c.y-c.h/2&&G.py<c.y+c.h/2){G.capSeen[i]=1;cap(c.t)}});
+  if(G.cool<=0)for(const d of CUR.doors){if(d.z===G.zone&&G.px>=d.r[0]&&G.px<=d.r[2]&&G.py>=d.r[1]&&G.py<=d.r[3]){go(d.to,d.tx,d.ty,d.dir);break}}
+ }
+ const[tx,ty]=camTarget();G.cx+=(tx-G.cx)*Math.min(1,dt*7);G.cy+=(ty-G.cy)*Math.min(1,dt*7);
+}
+async function go(zone,x,y,dir){
+ G.busy=true;for(const k in held)held[k]=0;await fadeTo(true);
+ G.zone=zone;G.W=G.zones[zone];G.px=x;G.py=y;G.dir=dir;G.cool=1.2;G.rogue.forEach(f=>{f.st='patrol'});snapCam();
+ const zc=CUR.zoneCap&&CUR.zoneCap[zone];if(zc&&!G.capSeen['z'+zone]){G.capSeen['z'+zone]=1;setTimeout(()=>cap(zc),500)}
+ await fadeTo(false);G.busy=false;
+}
+function blit(c,img,cx,cy,vw,vh,T){
+ const sx=Math.max(0,cx*TS),sy=Math.max(0,cy*TS),ex=Math.min(img.width,(cx+vw)*TS),ey=Math.min(img.height,(cy+vh)*TS);if(ex<=sx||ey<=sy)return;
+ c.drawImage(img,sx,sy,ex-sx,ey-sy,Math.round((sx/TS-cx)*T),Math.round((sy/TS-cy)*T),Math.ceil((ex-sx)/TS*T),Math.ceil((ey-sy)/TS*T))}
+function emo(c,e,x,y,s){c.font=s+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(e,x,y)}
+function draw(){
+ const cv=$('cv'),c=G.ctx,W=G.W,T=G.T,u=T/TS,vw=cv.width/T,vh=cv.height/T,cx=G.cx,cy=G.cy,t=G.t;
+ c.setTransform(1,0,0,1,0,0);c.fillStyle='#0a0618';c.fillRect(0,0,cv.width,cv.height);c.imageSmoothingEnabled=false;
+ if(G.shake>0)c.translate((Math.random()-.5)*G.shake*T*.25,(Math.random()-.5)*G.shake*T*.25);
+ blit(c,W.gc,cx,cy,vw,vh,T);
+ const S2=(x,y)=>[(x-cx)*T,(y-cy)*T];
+ W.water.forEach(([x,y,p])=>{const a=(Math.sin(t*2+p)+1)/2;if(a<.5)return;const[sx,sy]=S2(x,y);c.fillStyle='rgba(255,255,255,'+(a-.4)*.5+')';c.fillRect(sx+T*.3,sy+T*.45,T*.3,T*.06)});
+ hazGround(c,S2,T,t);
+ const ents=[{y:G.py,f:()=>{const[sx,sy]=S2(G.px,G.py);if(G.inv>0&&Math.floor(t*14)%2)return;const dd=G.slide>0?['d','l','u','r'][Math.floor(t*14)%4]:G.dir;drawChar(c,sx,sy,u,PLAYER(),dd,G.moving&&!G.busy?Math.floor(G.walk*8)%4:0);if(G.slide>0||G.stun>0)emo(c,'💫',sx,sy-T*1.2,T*.5)}}];
+ hazEnts(ents,c,S2,T,u);
+ G.npcs.forEach(n=>{if(n.zone!==G.zone)return;ents.push({y:n.y,f:()=>{const[sx,sy]=S2(n.x,n.y);drawChar(c,sx,sy,u,n.st,n.dir,n.fr,G.talking===n?G.t:0)}})});
+ (W.flam||[]).forEach((f,i)=>ents.push({y:f[1],f:()=>{const[sx,sy]=S2(f[0],f[1]);drawRogue(c,'flamingo',sx,sy,u,i%2?1:-1,t+i,'x')}}));
+ ents.sort((a,b)=>a.y-b.y).forEach(e=>e.f());
+ blit(c,W.oc,cx,cy,vw,vh,T);
+ // markers
+ for(const n of G.npcs){if(n.zone!==G.zone)continue;const[sx,sy]=S2(n.x,n.y),d=Math.hypot(n.x-G.px,n.y-G.py);
+  const unmet=!G.met[n.id]&&n.clues.length&&!n.odd;
+  if(unmet&&!G.busy){const b=Math.sin(t*4)*T*.06;c.fillStyle='#ffd23f';c.beginPath();c.arc(sx,sy-T*1.5+b,T*.17,0,7);c.fill();c.fillStyle='#150b30';c.font='700 '+T*.24+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',sx,sy-T*1.5+b+1)}
+  if(d<3.6&&!G.busy){c.font='700 '+T*.2+'px Rubik,sans-serif';const w=c.measureText(n.name).width+T*.24;c.fillStyle='rgba(21,11,48,.8)';c.fillRect(sx-w/2,sy+T*.1,w,T*.3);c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(n.name,sx,sy+T*.26)}}
+ if(G.near&&!G.busy){const e=G.near,[sx,sy]=S2(e.x,e.y),b=Math.sin(t*5)*T*.05;c.fillStyle='rgba(255,255,255,.95)';c.beginPath();c.arc(sx,sy-T*(e.lines&&G.npcs.includes(e)?1.55:.9)+b,T*.2,0,7);c.fill();c.fillStyle='#ff3d8b';c.font='700 '+T*.24+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('A',sx,sy-T*(G.npcs.includes(e)?1.55:.9)+b+1)}
+ const g=c.createRadialGradient(cv.width/2,cv.height/2,Math.min(cv.width,cv.height)*.35,cv.width/2,cv.height/2,Math.max(cv.width,cv.height)*.72);
+ g.addColorStop(0,'rgba(255,200,130,.05)');g.addColorStop(1,'rgba(14,6,40,.55)');c.fillStyle=g;c.fillRect(0,0,cv.width,cv.height);
+ hazOverlay(c,cv);
+}
+/* dialogue box: used on the map and in the phone scene */
+function showDlg(on){$('dlg').hidden=!on;document.querySelectorAll('.ctl').forEach(e=>e.classList.toggle('off',on&&screen==='play'));if(screen==='play')$('play').classList.toggle('cine',on)}
+function say(name,st,text){return new Promise(res=>{
+ drawBust($('dp'),st);$('dn').textContent=name;$('dc').hidden=true;$('dt').textContent='';$('dk').hidden=true;
+ let i=0;clearInterval(typing);DL.next=null;
+ const done=()=>{clearInterval(typing);typing=null;$('dt').textContent=text;$('dk').hidden=false;DL.next=res};
+ DL.finish=done;typing=setInterval(()=>{i++;$('dt').textContent=text.slice(0,i);if(i%3===0)sfx.blip();if(i>=text.length)done()},22)})}
+$('dlg').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;if(typing)DL.finish();else if(DL.next){const n=DL.next;DL.next=null;n()}});
+function choices(html,btns){return new Promise(res=>{const dc=$('dc');dc.hidden=false;
+ dc.innerHTML=html+'<div class="row">'+btns.map((b,i)=>`<button class="btn ${b[1]}" data-c="${i}">${b[0]}</button>`).join('')+'</div>';
+ dc.onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;dc.hidden=true;dc.onclick=null;res(+b.dataset.c)}})}
+async function offer(id){
+ const c=CLUES[id];if(G.notes.includes(id))return;
+ const k=await choices(`<div class="q">${esc(c.txt)}<small>Source: ${esc(c.src)}</small></div><p class="mute" style="font-size:13px">Can it be checked? Is the person sure, or guessing? Keep only what you would stand behind.</p>`,[['Keep in notebook','teal'],['Skip it','ghost']]);
+ if(k===0){G.notes.push(id);sfx.ding();toast('Added to your notebook')}else sfx.no();updHud();
+}
+async function interact(){
+ const e=G.near;if(!e||G.busy)return;
+ G.busy=true;for(const k in held)held[k]=0;G.moving=false;
+ const isN=G.npcs.includes(e),st=isN?e.st:PLAYER();
+ if(isN){G.talking=e;const ax=G.px-e.x,ay=G.py-e.y;e.dir=Math.abs(ax)>Math.abs(ay)?(ax>0?'r':'l'):(ay>0?'d':'u')}
+ showDlg(true);
+ const bag=e.odd?(G.odd=G.odd||{}):G.met,first=!bag[e.id];bag[e.id]=1;
+ if(first||!e.again){for(const it of e.lines){if(typeof it==='string')await say(e.name,st,it);else await offer(it.clue)}}
+ else{await say(e.name,st,e.again[0]);for(const id of e.clues||[])if(!G.notes.includes(id))await offer(id)}
+ showDlg(false);G.talking=null;G.busy=false;if(first){toast(e.odd?'+5 points: odd find':'+10 points: new lead');sfx.ding()}updHud();
+ if(oddTotal()&&oddCount()>=oddTotal()&&!G.oddSaid){G.oddSaid=1;G.oddFull=true;setTimeout(()=>{toast('Curiosity bonus! +25 points for finding every odd thing here');sfx.ding();updHud()},1400)}
+}
+const THR=()=>Math.round((G.npcs.filter(x=>!x.odd).length+G.spots.filter(x=>!x.odd).length)*.65);
+const fieldPts=()=>leadCount()*10+oddCount()*5+(G.oddFull?25:0)+G.notes.length*5+(G.full?50:0)-G.pen;
+const leadTotal=()=>G.npcs.filter(x=>!x.odd).length+G.spots.filter(x=>!x.odd).length,leadCount=()=>Object.keys(G.met).length;
+const oddTotal=()=>G.npcs.filter(x=>x.odd).length+G.spots.filter(x=>x.odd).length,oddCount=()=>Object.keys(G.odd||{}).length;
+const canFile=()=>leadCount()>=THR()&&G.notes.length>=3;
+function updHud(){
+ const n=G.notes.length,m=leadCount(),tot=leadTotal();
+ $('b-notes').textContent='Notebook ('+n+')';$('b-file').classList.toggle('dis',!canFile());
+ $('mf').style.width=(m/tot*100)+'%';$('mk').style.left=(THR()/tot*100)+'%';$('mt').textContent='LEADS '+m+'/'+tot;
+ $('pts').textContent='PTS '+fieldPts()+(oddTotal()?'  ODD '+oddCount()+'/'+oddTotal():'');$('hearts').textContent='♥'.repeat(G.cred)+'♡'.repeat(G.maxCred-G.cred);
+ if(m>=tot)G.full=true;
+ $('objt').textContent=m<THR()?'Cover more ground. Talk to people and examine things. '+(THR()-m)+' more leads before Mags takes your story.':n<3?'Keep at least 3 notes you trust.':G.full?'Every lead covered. File your story to Mags.':'Mags will take your story now, but more leads make it stronger.';
+ if(canFile()&&!G.rang){G.rang=true;G.ringPend=true}
+}
+async function magsCall(){
+ G.busy=true;for(const k in held)held[k]=0;G.moving=false;
+ openM(`<span class="call">Incoming call</span><div class="big">Mags Stone</div><button class="btn teal" id="ans">Answer</button>`);sfx.ring();
+ await new Promise(r=>{$('ans').onclick=r});sfx.stop();closeM();showDlg(true);
+ await say('Mags Stone',MAGS,"Rookie. Sounds like you've got the picture. Hit File story whenever you're ready and I'll take it.");
+ await say('Mags Stone',MAGS,"But there are still people and places you haven't covered. Every lead makes the story stronger, and full coverage earns a bonus. Your call.");
+ showDlg(false);G.busy=false;updHud();
+}
+function noteList(){return G.notes.map(id=>`<div class="ev"><p><span class="stamp" style="color:var(--teal)">Notebook</span>${esc(CLUES[id].txt)}<span class="snote">Source: ${esc(CLUES[id].src)}</span></p><button class="btn ghost sm" data-x="${id}" style="align-self:flex-start;margin-top:6px">Cross out</button></div>`).join('')||'<p class="mute">Nothing yet. Talk to people and examine things.</p>'}
+$('b-notes').onclick=()=>{openM(`<span class="call">Your notebook</span><div id="nl" style="display:flex;flex-direction:column;gap:10px">${noteList()}</div><button class="btn teal" id="ok">Back to the map</button>`);$('ok').onclick=closeM;
+ $('nl').onclick=e=>{const b=e.target.closest('[data-x]');if(!b)return;G.notes=G.notes.filter(x=>x!==b.dataset.x);$('nl').innerHTML=noteList();updHud()}};
+$('b-exit').onclick=()=>{openM(`<span class="call">Leave this case?</span><p>Your notebook for this case will be lost.</p><div class="row"><button class="btn ghost" id="n">Stay</button><button class="btn" id="y">Leave</button></div>`);$('n').onclick=closeM;$('y').onclick=()=>{closeM();G=null;renderCases();show('cases')}};
+$('b-mute').onclick=()=>{S.mute=!S.mute;$('b-mute').textContent=S.mute?'Sound off':'Sound on'};
+$('b-file').onclick=async()=>{
+ if(G.busy)return;
+ if(!canFile()){sfx.no();toast(leadCount()<THR()?'Mags: not enough ground covered. '+(THR()-leadCount())+' more leads.':'Mags: keep at least 3 notes you trust.');return}
+ G.busy=true;for(const k in held)held[k]=0;
+ openM(`<span class="call">Incoming call</span><div class="big">Mags Stone</div><button class="btn teal" id="ans">Answer</button>`);sfx.ring();
+ await new Promise(r=>{$('ans').onclick=r});sfx.stop();closeM();showDlg(true);
+ if(!G.full)await say('Mags Stone',MAGS,"You haven't covered every lead. Full coverage earns a bonus, but deadline's deadline.");
+ await say('Mags Stone',MAGS,CUR.filecall);showDlg(false);G.busy=false;openDesk();
+};
+/* the opening phone call */
+async function callScene(ci){CUR=LV[ci];CI=ci;CLUES=CUR.clues;D=null;setScene(CUR);
+ show('scene');$('scene').appendChild($('dlg'));$('dlg').hidden=true;
+ const ph=$('phone'),sc=$('scene');ph.className='ring';ph.classList.remove('away');sc.classList.add('ringing');$('pbtns').hidden=false;$('pn').textContent='Incoming call';
+ $('sbt').style.height=$('sbb').style.height='0';sfx.ring();
+ let declined=0;
+ await new Promise(res=>{$('pa').onclick=res;$('pd').onclick=async()=>{declined++;sfx.stop();ph.className='';sc.classList.remove('ringing');$('pbtns').hidden=true;$('pn').textContent='Mags calls back. She always calls back.';await wait(1800);$('pn').textContent='Incoming call';ph.className='ring';sc.classList.add('ringing');$('pbtns').hidden=false;sfx.ring()}});
+ sfx.stop();ph.className='away';sc.classList.remove('ringing');$('pbtns').hidden=true;
+ $('sbt').style.height=$('sbb').style.height='11%';await wait(700);
+ for(const l of (CUR.pre||[])){showDlg(true);if(l.me)await say(jname(),PLAYER(),l.me);else await say('Mags Stone',MAGS,l.t)}
+ for(let j=0;j<CUR.call.length;j++){const l=CUR.call[j];showDlg(true);await say('Mags Stone',MAGS,l.t);
+  if(l.ch){const k=await choices('',l.ch.map((t,j)=>[esc(t),j?'ghost':'teal']));await say(jname(),PLAYER(),l.ch[k]);await say('Mags Stone',MAGS,CUR.reply[k])}}
+ showDlg(false);
+ startLevel();$('play').classList.remove('cine');
+ await fadeTo(true,CUR.title);await wait(2400);await fadeTo(false);
+ cap(CUR.caps[0].t);G.capSeen[0]=1;
+}
+/* live hazards: loose flamingos, slick mud, cred hearts */
+function initHazards(){
+ G.slick=CUR.slicks.map(s=>s.slice());
+ G.rogue=(CUR.rogues||[]).map((r,i)=>({k:r.k,x:r.w[0][0],y:r.w[0][1],w:r.w,wi:1,st:'patrol',t:0,fl:1,zone:r.z||CUR.start.zone,i}));
+hz2Init();
+}
+function hazSlide(dt){G.slide-=dt;const sp=5.4*dt,dx=G.sv[0]*sp,dy=G.sv[1]*sp;let mv=0;
+ if(!blocked(G.px+dx,G.py)){G.px+=dx;mv=1}if(!blocked(G.px,G.py+dy)){G.py+=dy;mv=1}
+ if(!mv)G.slide=0;G.moving=true;G.walk+=dt*3}
+function fmove(f,tx,ty,spd,dt){const ax=tx-f.x,ay=ty-f.y,d=Math.hypot(ax,ay);if(d<.05)return d;
+ const nx=f.x+ax/d*spd*dt,ny=f.y+ay/d*spd*dt;if(!solidAt(G.W,nx,f.y))f.x=nx;if(!solidAt(G.W,f.x,ny))f.y=ny;if(Math.abs(ax)>.05)f.fl=ax>0?1:-1;return d}
+function hazUpdate(dt){
+ G.inv=Math.max(0,G.inv-dt);G.stun=Math.max(0,(G.stun||0)-dt);G.slipCool=Math.max(0,G.slipCool-dt);G.flash=Math.max(0,G.flash-dt);G.shake=Math.max(0,G.shake-dt*3);
+ if(G.slide<=0&&G.slipCool<=0&&G.moving){
+  for(const s of G.slick){if(s[2]!==G.zone)continue;
+   if(Math.hypot(G.px-s[0],G.py-s[1])<.6){const dx=held.r-held.l,dy=held.d-held.u,m=Math.hypot(dx,dy);if(!m)break;
+    G.sv=[dx/m,dy/m];G.slide=.6;G.slipCool=1.8;sfx.slip();if(!G.slipSeen){G.slipSeen=1;cap('Whoa! Shiny puddles are slippery. Walk around them.')}break}}}
+ const sp=S.gentle?2.4:3.0,rad=S.gentle?2.6:3.3;
+ for(const f of G.rogue){if(f.zone!==G.zone)continue;
+  const d=Math.hypot(G.px-f.x,G.py-f.y);
+  if(f.st==='patrol'){const tg=f.w[f.wi];if(fmove(f,tg[0],tg[1],1,dt)<.15)f.wi=(f.wi+1)%f.w.length;
+   if(d<rad&&G.inv<=0){f.st='alert';f.t=.6;sfx.honk();if(!G.warned){G.warned=1;cap(CUR.warn)}}}
+  else if(f.st==='alert'){f.t-=dt;f.fl=G.px>f.x?1:-1;if(f.t<=0){f.st='charge';f.t=2.6}}
+  else if(f.st==='charge'){f.t-=dt;fmove(f,G.px,G.py,sp,dt);
+   if(d<.62&&G.inv<=0)hazHit(f);
+   if(f.t<=0||d>rad*2){f.st='rest';f.t=2}}
+  else{f.t-=dt;if(f.t<=0)f.st='patrol'}}
+hz2Update(dt);
+}
+function hazHit(f){
+ G.cred--;G.inv=1.8;G.flash=.35;G.shake=1;sfx.hit();
+ const ax=G.px-f.x,ay=G.py-f.y,m=Math.hypot(ax,ay)||1;
+ for(let i=0;i<9;i++){const nx=G.px+ax/m*.15,ny=G.py+ay/m*.15;if(!blocked(nx,G.py))G.px=nx;if(!blocked(G.px,ny))G.py=ny}
+ if(!f.type){f.st='rest';f.t=2.6}else if(f.type==='tether'){f.st='idle'}updHud();toast('Ouch! That hurt your cred.');
+ if(G.cred<=0)knockOut();
+}
+async function knockOut(){
+ G.busy=true;for(const k in held)held[k]=0;G.moving=false;G.slide=0;
+ await fadeTo(true,['Out cold','Cred lost. This round goes to the hazards.']);await wait(1800);
+ G.zone=CUR.start.zone;G.W=G.zones[G.zone];G.px=CUR.start.x;G.py=CUR.start.y;G.dir='u';snapCam();
+ G.cred=G.maxCred;G.pen+=50;G.inv=2.5;G.rogue.forEach(f=>{f.st='patrol'});hz2Init();
+ const lost=G.notes.length?G.notes.pop():null;updHud();
+ await fadeTo(false);showDlg(true);
+ const dor=G.npcs[0];
+ await say(dor.name,dor.st,lost?CUR.ko:KO+'. Mind the hazards.');
+ showDlg(false);G.busy=false;
+}
+function hazGround(c,S2,T,t){
+ const col=SLK[CUR.slickCol]||SLK.mud;
+ for(const s of G.slick){if(s[2]!==G.zone)continue;const[sx,sy]=S2(s[0],s[1]);
+  c.fillStyle='rgba('+col[0]+',.88)';c.beginPath();c.ellipse(sx,sy,T*.62,T*.34,0,0,7);c.fill();
+  c.strokeStyle='rgba('+col[1]+','+(.45+Math.sin(t*3+s[0])*.25)+')';c.lineWidth=Math.max(2,T*.05);c.beginPath();c.ellipse(sx,sy,T*.52,T*.27,0,3.3,5.3);c.stroke();
+  c.fillStyle='rgba(255,255,255,.6)';c.fillRect(sx-T*.22,sy-T*.1,T*.13,T*.05);c.fillRect(sx+T*.1,sy+T*.05,T*.08,T*.04)}
+ hz2Ground(c,S2,T,t);
+}
+function hazEnts(ents,c,S2,T,u){
+ for(const f of G.rogue){if(f.zone!==G.zone)continue;
+  ents.push({y:f.y,f:()=>{const[sx,sy]=S2(f.x,f.y);
+   drawRogue(c,f.k,sx,sy,u,f.fl,G.t+f.i,f.st);
+   if(f.st==='alert'||f.st==='charge'){const b=Math.sin(G.t*12)*T*.04;c.fillStyle='#ff2d4a';c.beginPath();c.arc(sx,sy-T*1.25+b,T*.17,0,7);c.fill();c.fillStyle='#fff';c.font='700 '+T*.24+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',sx,sy-T*1.25+b+1)}}})}
+ hz2Ents(ents,c,S2,T,u);
+}
+function hazOverlay(c,cv){hz2Top(c,(x,y)=>[(x-G.cx)*G.T,(y-G.cy)*G.T],G.T);if(G.flash>0){c.setTransform(1,0,0,1,0,0);c.fillStyle='rgba(255,40,70,'+Math.min(.6,G.flash*1.4)+')';c.fillRect(0,0,cv.width,cv.height)}}
+/* varied dangers. Each one has a rule the student can read and beat:
+   rail   : a mover (cleaner, forklift, car, ball) on a marked lane. Pauses at each end.
+   pulse  : a fixture (sprinkler, pipe, wave) that warns, then sprays on a timer.
+   tether : a chained dog. Only reaches as far as its chain.
+   swoop  : a bird that marks a target on the ground, then dives on it.
+   sweep  : a rotating windmill blade or a searchlight beam. */
+const BULLY_ST={skin:'#e8b098',hair:'#2a1a14',shirt:'#c43a3a',pants:'#3a3a5a',acc:'none',kid:1,hat:'#2a6bd8',ht:'cap'},GUARD_ST={skin:'#c98e62',hair:'#1a1210',shirt:'#2a3a6a',pants:'#1a2030',acc:'badge',hat:'#2a3a6a'};
+const HZ_PERSON=(shirt,pants)=>({skin:'#c98e62',hair:'#2a1a14',shirt,pants,acc:'none'});
+function hz2Init(){
+ G.wk={};G.peb=[];
+ G.hz=(CUR.haz||[]).map((h,i)=>{const o={...h,i,zone:h.z||CUR.start.zone,t:h.o||0,st:'idle',fl:1,x:h.x||0,y:h.y||0};
+  if(h.type==='rail'){o.x=h.w[0][0];o.y=h.w[0][1];o.wi=1;o.pa=h.pause||1;o.mv=false}
+  else if(h.type==='tether'){o.ax=h.x;o.ay=h.y}
+  else if(h.type==='swoop'){o.x=h.home[0];o.y=h.home[1];o.tx=o.x;o.ty=o.y;o.t=1+Math.random()*2}
+  else if(h.type==='sweep'){o.ang=0}
+  else if(h.type==='bully'){o.t=4;o.say='';o.sayT=0}
+  else if(h.type==='guard'){o.wi=1;o.pa=1;o.face=0;o.alert=0;o.base=0;o.x=h.w[0][0];o.y=h.w[0][1]}
+  return o})}
+const gmul=()=>S.gentle?.72:1;
+const BULLY_SAY=['Hey, journo!','Nice notebook, nerd!','Bet you cannot spell headline!','Print THIS!','Tiny reporter!','Ha! Wobbly legs!'];
+function hz2Los(ax,ay,bx,by){const n=Math.ceil(Math.hypot(bx-ax,by-ay)/.25);for(let i=1;i<n;i++){const t=i/n;if(solidAt(G.W,ax+(bx-ax)*t,ay+(by-ay)*t))return false}return true}
+async function hz2Bust(){
+ G.busted=true;G.busy=true;for(const k in held)held[k]=0;G.moving=false;sfx.no();
+ await fadeTo(true,['BUSTED!','The guard threw you out. Back to the start of the case.']);await wait(2200);
+ startLevel();await fadeTo(false);cap(CUR.caps[0].t);
+}
+function hz2Pebbles(dt){
+ if(!G.peb)return;
+ for(const p of G.peb){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
+  if(solidAt(G.W,p.x,p.y+.5))p.life=0;
+  else if(!G.busy&&Math.hypot(G.px-p.x,(G.py-.5)-p.y)<.5){p.life=0;G.stun=.6;const m=Math.hypot(p.vx,p.vy)||1;for(let i=0;i<4;i++){const nx=G.px+p.vx/m*.12,ny=G.py+p.vy/m*.12;if(!blocked(nx,G.py))G.px=nx;if(!blocked(G.px,ny))G.py=ny}sfx.no();G.flash=.12;toast('Ouch! A pebble to the head. No harm done.')}}
+ G.peb=G.peb.filter(p=>p.life>0)}
+function hz2Update(dt){
+ if(!G.hz)return;const g=gmul();hz2Pebbles(dt);
+ for(const f of G.hz){if(f.zone!==G.zone)continue;
+  const dx=G.px-f.x,dy=G.py-f.y,d=Math.hypot(dx,dy);
+  if(f.msg&&!G.wk[f.type+(f.k||'')]&&d<8){G.wk[f.type+(f.k||'')]=1;cap(f.msg)}
+  if(f.type==='rail'){
+   if(f.pa>0){f.pa-=dt;f.mv=false}
+   else{f.mv=true;const tg=f.w[f.wi],ax=tg[0]-f.x,ay=tg[1]-f.y,dd=Math.hypot(ax,ay),st=(f.sp||1.6)*g*dt;
+    if(dd<=st){f.x=tg[0];f.y=tg[1];if(f.oneway){f.x=f.w[0][0];f.y=f.w[0][1];f.wi=1}else f.wi=(f.wi+1)%f.w.length;f.pa=(f.pause||1.2)/g;f.mv=false}
+    else{f.x+=ax/dd*st;f.y+=ay/dd*st;if(Math.abs(ax)>.02)f.fl=ax>0?1:-1}}
+   const hw=(f.box?f.box[0]:.7),hh=(f.box?f.box[1]:.7);
+   if(f.mv&&G.inv<=0&&Math.abs(G.px-f.x)<hw&&Math.abs(G.py-f.y)<hh)hazHit(f)}
+  else if(f.type==='pulse'){
+   const per=f.per/(g>.9?1:1.15),on=f.on*g,tele=f.tele||.9;f.t+=dt;const c=f.t%per;
+   f.ph=c<on?2:(c>per-tele?1:0);
+   if(f.ph===2&&G.inv<=0){const inz=f.w?(Math.abs(dx)<f.w/2&&Math.abs(dy)<f.h/2):(d<f.r);if(inz)hazHit(f)}}
+  else if(f.type==='tether'){
+   const dp=Math.hypot(G.px-f.ax,G.py-f.ay),reach=f.r;
+   if(dp<reach+1.3){if(f.st==='idle'){f.st='alert';f.t=.55;sfx.honk()}
+    else if(f.st==='alert'){f.t-=dt;f.fl=G.px>f.x?1:-1;if(f.t<=0)f.st='charge'}
+    else{const m=Math.min(dp,reach),ux=(G.px-f.ax)/(dp||1),uy=(G.py-f.ay)/(dp||1),tx=f.ax+ux*m,ty=f.ay+uy*m,ax=tx-f.x,ay=ty-f.y,dd=Math.hypot(ax,ay),st=(f.sp||3.1)*g*dt;
+     if(dd>.05){f.x+=ax/dd*Math.min(st,dd);f.y+=ay/dd*Math.min(st,dd);if(Math.abs(ax)>.05)f.fl=ax>0?1:-1}}}
+   else{f.st='idle';const ax=f.ax-f.x,ay=f.ay-f.y,dd=Math.hypot(ax,ay);if(dd>.05){f.x+=ax/dd*Math.min(1.4*dt,dd);f.y+=ay/dd*Math.min(1.4*dt,dd)}}
+   if(f.st==='charge'&&G.inv<=0&&Math.hypot(G.px-f.x,G.py-f.y)<.65)hazHit(f)}
+  else if(f.type==='swoop'){
+   const hd=Math.hypot(G.px-f.home[0],G.py-f.home[1]);
+   if(f.st==='idle'){f.t-=dt;f.x=f.home[0]+Math.cos(G.t*.7+f.i*2)*2.4;f.y=f.home[1]+Math.sin(G.t*.9+f.i)*1.1;
+    if(f.t<=0&&hd<(f.range||8)){f.st='aim';f.t=1.15*(g<1?1.25:1);const vx=held.r-held.l,vy=held.d-held.u;f.tx=G.px+vx*.9;f.ty=G.py+vy*.9;f.fl=f.tx>f.x?1:-1;sfx.honk()}else if(f.t<=0)f.t=.8}
+   else if(f.st==='aim'){f.t-=dt;f.x+=(f.tx-f.x)*Math.min(1,dt*3);f.y+=(f.ty-f.y)*Math.min(1,dt*3);if(f.t<=0){f.st='strike';f.t=.28;f.x=f.tx;f.y=f.ty;if(G.inv<=0&&Math.hypot(G.px-f.tx,G.py-f.ty)<.85)hazHit(f)}}
+   else if(f.st==='strike'){f.t-=dt;if(f.t<=0){f.st='rest';f.t=1.5}}
+   else{f.t-=dt;if(f.t<=0){f.st='idle';f.t=1.2+Math.random()*1.6}}}
+  else if(f.type==='bully'){
+   f.sayT=Math.max(0,f.sayT-dt);
+   if(f.st==='idle'){f.t-=dt;if(f.t<=0&&d<9.5){f.st='aim';f.t=.7;f.fl=G.px>f.x?1:-1;f.say=BULLY_SAY[Math.floor(Math.random()*BULLY_SAY.length)];f.sayT=2.2}else if(f.t<=0)f.t=1}
+   else if(f.st==='aim'){f.t-=dt;f.fl=G.px>f.x?1:-1;if(f.t<=0){const ax=G.px-f.x,ay=G.py-(f.y+.0),dd=Math.hypot(ax,ay)||1;G.peb.push({x:f.x,y:f.y-.5,vx:ax/dd*6,vy:ay/dd*6,life:2});f.st='rest';f.t=(S.gentle?3.8:2.6)}}
+   else{f.t-=dt;if(f.t<=0)f.st='idle'}}
+  else if(f.type==='guard'){
+   const gl=S.gentle?4.4:(f.len||5.4),gr=S.gentle?.95:.5,ang=(a)=>Math.atan2(Math.sin(a),Math.cos(a));
+   if(f.pa>0){f.pa-=dt;f.mv=false;f.face=f.base+Math.sin(G.t*1.6+f.i)*1.0}
+   else{f.mv=true;const tg=f.w[f.wi],ax=tg[0]-f.x,ay=tg[1]-f.y,dd=Math.hypot(ax,ay),st=(f.sp||1.3)*g*dt;f.base=Math.atan2(ay,ax);f.face=f.base;
+    if(dd<=st){f.x=tg[0];f.y=tg[1];f.wi=(f.wi+1)%f.w.length;f.pa=f.pause||1.6;f.mv=false}else{f.x+=ax/dd*st;f.y+=ay/dd*st}}
+   const vx=G.px-f.x,vy=G.py-f.y,dd=Math.hypot(vx,vy),da=Math.abs(ang(Math.atan2(vy,vx)-f.face));
+   const see=dd<gl&&da<(f.half||.45)&&hz2Los(f.x,f.y,G.px,G.py);
+   if(see){if(f.alert<=0)sfx.honk();f.alert+=dt;if(f.alert>=gr&&!G.busted){hz2Bust();return}}else f.alert=Math.max(0,f.alert-dt*1.5)}
+  else if(f.type==='sweep'){
+   if(f.k==='blades'){f.ang+=(f.sp||.9)*g*dt;
+    if(G.inv<=0){for(let a=0;a<(f.n||4);a++){const an=f.ang+a*Math.PI*2/(f.n||4),ux=Math.cos(an),uy=Math.sin(an),al=dx*ux+dy*uy,pe=Math.abs(dx*uy-dy*ux);if(al>.9&&al<f.len&&pe<.5){hazHit(f);break}}}}
+   else{f.ang=f.mid+f.amp*Math.sin(G.t*(f.sp||.7)*g+(f.o||0));const px=dx,py=dy,dd=Math.hypot(px,py);let da=Math.atan2(py,px)-f.ang;da=Math.atan2(Math.sin(da),Math.cos(da));
+    f.hit=dd<f.len&&Math.abs(da)<f.half;if(f.hit&&G.inv<=0)hazHit(f)}}
+ }}
+function hz2Ground(c,S2,T,t){
+ if(!G.hz)return;
+ for(const f of G.hz){if(f.zone!==G.zone)continue;
+  if(f.type==='rail'){const[ax,ay]=S2(f.w[0][0],f.w[0][1]),[bx,by]=S2(f.w[f.w.length-1][0],f.w[f.w.length-1][1]);
+   c.save();c.strokeStyle='rgba(255,210,60,.55)';c.lineWidth=Math.max(3,T*.09);c.setLineDash([T*.28,T*.22]);c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke();c.restore();
+   if(f.oneway){c.fillStyle='#3a3a4a';c.fillRect(ax-T*.35,ay-T*.35,T*.7,T*.55);c.fillStyle=(f.pa>0&&f.pa<.9&&Math.floor(t*10)%2)?'#ff3d3d':'#7a2a2a';c.fillRect(ax-T*.15,ay-T*.2,T*.3,T*.18)}}
+  else if(f.type==='pulse'){const[sx,sy]=S2(f.x,f.y),ph=f.ph||0;
+   c.fillStyle='#5a6270';c.beginPath();c.ellipse(sx,sy,T*.14,T*.07,0,0,7);c.fill();c.fillStyle='#8a93a2';c.fillRect(sx-T*.05,sy-T*.16,T*.1,T*.16);
+   if(f.w){const w=f.w*T,h=f.h*T;if(ph===1){c.save();c.strokeStyle='rgba(255,255,255,.8)';c.setLineDash([T*.2,T*.15]);c.lineWidth=3;c.strokeRect(sx-w/2,sy-h/2,w,h);c.restore()}
+    if(ph===2){c.fillStyle='rgba(120,200,255,.5)';c.fillRect(sx-w/2,sy-h/2,w,h);c.fillStyle='rgba(255,255,255,.7)';for(let i=0;i<w/T*3;i++){const xx=sx-w/2+i*T*.33;c.fillRect(xx,sy-h/2+Math.sin(t*6+i)*T*.2+h*.1,T*.2,T*.06)}}}
+   else{const r=f.r*T;if(ph===1){c.save();c.strokeStyle='rgba(255,255,255,.85)';c.setLineDash([T*.18,T*.14]);c.lineWidth=3;c.beginPath();c.ellipse(sx,sy,r,r*.6,0,0,7);c.stroke();c.restore()}
+    if(ph===2){c.fillStyle='rgba(120,200,255,.45)';c.beginPath();c.ellipse(sx,sy,r,r*.6,0,0,7);c.fill();c.strokeStyle='rgba(230,248,255,.9)';c.lineWidth=2;for(let i=0;i<10;i++){const a=i*.63+t*4;c.beginPath();c.moveTo(sx,sy-T*.1);c.lineTo(sx+Math.cos(a)*r*.9,sy+Math.sin(a)*r*.5-T*.2*Math.abs(Math.sin(t*9+i)));c.stroke()}}}}
+  else if(f.type==='tether'){const[ax,ay]=S2(f.ax,f.ay);
+   c.save();c.strokeStyle='rgba(255,90,90,.35)';c.setLineDash([T*.12,T*.18]);c.lineWidth=2;c.beginPath();c.ellipse(ax,ay,f.r*T,f.r*T*.75,0,0,7);c.stroke();c.restore();
+   c.fillStyle='#4a3018';c.fillRect(ax-T*.06,ay-T*.4,T*.12,T*.4);c.fillStyle='#8a8f9a';c.fillRect(ax-T*.12,ay-T*.4,T*.24,T*.07)}
+  else if(f.type==='guard'){const[gx,gy]=S2(f.x,f.y),gl=(S.gentle?4.4:(f.len||5.4)),hf=f.half||.45,al=f.alert>0;
+   c.beginPath();c.moveTo(gx,gy);for(let i=0;i<=16;i++){const a=f.face-hf+hf*2*i/16;let r=gl;for(let s2=.3;s2<=gl;s2+=.25){if(solidAt(G.W,f.x+Math.cos(a)*s2,f.y+Math.sin(a)*s2)){r=s2;break}}c.lineTo(gx+Math.cos(a)*r*T,gy+Math.sin(a)*r*T)}c.closePath();
+   c.fillStyle=al?'rgba(255,60,60,.34)':'rgba(255,235,120,.26)';c.fill();c.strokeStyle=al?'rgba(255,60,60,.8)':'rgba(255,235,120,.55)';c.lineWidth=2;c.stroke()}
+  else if(f.type==='swoop'){const[sx,sy]=S2(f.x,f.y);
+   if(f.st==='aim'){const k=1-f.t/1.15,r=T*(.7-.25*Math.min(1,k));c.fillStyle='rgba(255,60,60,'+(.18+.25*k)+')';c.beginPath();c.ellipse(sx,sy,r,r*.6,0,0,7);c.fill();c.strokeStyle='rgba(255,60,60,.9)';c.lineWidth=3;c.stroke()}
+   else{c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.ellipse(sx,sy,T*.28,T*.1,0,0,7);c.fill()}}
+ }}
+function hz2Ents(ents,c,S2,T,u){
+ if(!G.hz)return;
+ for(const f of G.hz){if(f.zone!==G.zone)continue;
+  if(f.type==='rail'){ents.push({y:f.y,f:()=>{if(f.oneway&&f.pa>0)return;const[sx,sy]=S2(f.x,f.y);drawMover(c,f.k,sx,sy,u,f.fl,G.t+f.i,f.mv,f.col);
+    if(!f.mv&&f.pa>0&&f.pa<.9&&Math.floor(G.t*8)%2){c.fillStyle='#ff9a2a';c.beginPath();c.arc(sx,sy-T*1.2,T*.15,0,7);c.fill();c.fillStyle='#150b30';c.font='700 '+T*.22+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',sx,sy-T*1.2+1)}}})}
+  else if(f.type==='tether'){ents.push({y:f.y,f:()=>{const[sx,sy]=S2(f.x,f.y),[ax,ay]=S2(f.ax,f.ay);c.strokeStyle='#8a8f9a';c.lineWidth=Math.max(2,u*1.2);c.beginPath();c.moveTo(ax,ay-T*.35);c.lineTo(sx,sy-T*.3);c.stroke();
+    drawRogue(c,'dog',sx,sy,u,f.fl,G.t+f.i,f.st==='charge'?'charge':'patrol');
+    if(f.st==='alert'||f.st==='charge'){c.fillStyle='#ff2d4a';c.beginPath();c.arc(sx,sy-T*1.05,T*.15,0,7);c.fill();c.fillStyle='#fff';c.font='700 '+T*.22+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',sx,sy-T*1.05+1)}}})}
+  else if(f.type==='bully'){ents.push({y:f.y,f:()=>{const[sx,sy]=S2(f.x,f.y);drawChar(c,sx,sy,u,BULLY_ST,f.fl>0?'r':'l',0,0);
+    c.strokeStyle='#6a3c1a';c.lineWidth=Math.max(2,u*1.4);c.beginPath();const hx=sx+f.fl*10*u,hy=sy-17*u;c.moveTo(hx,hy+4*u);c.lineTo(hx,hy);c.lineTo(hx-3*u,hy-4*u);c.moveTo(hx,hy);c.lineTo(hx+3*u,hy-4*u);c.stroke();
+    if(f.sayT>0){c.font='700 '+T*.2+'px Rubik,sans-serif';const w=c.measureText(f.say).width+T*.3,bx=sx-w/2,by=sy-T*1.55;c.fillStyle='#fff';c.fillRect(bx,by,w,T*.34);c.fillStyle='#150b30';c.textAlign='center';c.textBaseline='middle';c.fillText(f.say,sx,by+T*.18)}}})}
+  else if(f.type==='guard'){ents.push({y:f.y,f:()=>{const[sx,sy]=S2(f.x,f.y),dg=((f.face%(Math.PI*2))+Math.PI*2)%(Math.PI*2),dir=dg<.785||dg>5.5?'r':dg<2.356?'d':dg<3.927?'l':'u';
+    drawChar(c,sx,sy,u,GUARD_ST,dir,f.mv?Math.floor(G.t*7)%4:0,0);
+    if(f.alert>0){c.fillStyle='#ff2d4a';c.beginPath();c.arc(sx,sy-T*1.25,T*.2,0,7);c.fill();c.fillStyle='#fff';c.font='700 '+T*.3+'px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('!',sx,sy-T*1.25+1)}}})}
+  else if(f.type==='swoop'){ents.push({y:f.y+(f.st==='strike'?0:3),f:()=>{const[sx,sy]=S2(f.x,f.y),lift=f.st==='strike'?0:(f.st==='aim'?T*(.4+.9*(f.t/1.15)):T*1.5);
+    drawRogue(c,f.k,sx,sy-lift,u,f.fl,G.t*1.6+f.i,f.st==='strike'?'charge':'patrol')}})}
+ }
+ if(G.peb)for(const p of G.peb)ents.push({y:p.y+.6,f:()=>{const[sx,sy]=S2(p.x,p.y);c.fillStyle='#6a6f7a';c.beginPath();c.arc(sx,sy,T*.07,0,7);c.fill();c.fillStyle='rgba(255,255,255,.6)';c.fillRect(sx-T*.03,sy-T*.04,T*.03,T*.03)}});
+}
+/* drawn above everything: windmill blades and the searchlight */
+function hz2Top(c,S2,T){
+ if(!G.hz)return;
+ for(const f of G.hz){if(f.zone!==G.zone||f.type!=='sweep')continue;const[hx,hy]=S2(f.x,f.y);
+  if(f.k==='blades'){c.save();c.translate(hx,hy);for(let a=0;a<(f.n||4);a++){c.save();c.rotate(f.ang+a*Math.PI*2/(f.n||4));
+    c.fillStyle='rgba(0,0,0,.18)';c.fillRect(T*.9+4,-T*.12+4,(f.len-.9)*T,T*.24);c.fillStyle='#f4f4f4';c.fillRect(T*.9,-T*.12,(f.len-.9)*T,T*.24);c.strokeStyle='#8a6a3a';c.lineWidth=3;c.strokeRect(T*.9,-T*.12,(f.len-.9)*T,T*.24);c.fillStyle='#c4302b';c.fillRect(T*.9,-T*.12,T*.5,T*.24);c.restore()}
+   c.fillStyle='#c4302b';c.beginPath();c.arc(0,0,T*.35,0,7);c.fill();c.strokeStyle='#8a6a3a';c.lineWidth=3;c.stroke();c.restore()}
+  else{const L=f.len*T,a0=f.ang-f.half,a1=f.ang+f.half;
+   const gr=c.createRadialGradient(hx,hy,T*.5,hx,hy,L);gr.addColorStop(0,'rgba(255,245,170,'+(f.hit?.7:.42)+')');gr.addColorStop(1,'rgba(255,245,170,.04)');
+   c.fillStyle=gr;c.beginPath();c.moveTo(hx,hy);c.arc(hx,hy,L,a0,a1);c.closePath();c.fill();
+   c.fillStyle='#2a2a3a';c.fillRect(hx-T*.25,hy-T*.3,T*.5,T*.4);c.fillStyle='#fff3a0';c.beginPath();c.arc(hx,hy,T*.12,0,7);c.fill()}}
+}
+/* moving machines. x,y = feet centre. fl = direction. */
+function drawMover(c,k,x,y,u,fl,t,mv,col){
+ const R=(a,b,w,h,cl)=>{const X=fl>0?a:-a-w;c.fillStyle=cl;c.fillRect(Math.round(x+X*u),Math.round(y+b*u),Math.ceil(w*u),Math.ceil(h*u))};
+ c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(x,y,16*u,4*u,0,0,7);c.fill();
+ if(k==='buffer'){
+  drawChar(c,x-fl*14*u,y,u,HZ_PERSON('#2a8a8a','#2a3a5a'),fl>0?'r':'l',mv?Math.floor(t*8)%4:0);
+  R(0,-5,22,5,'#6a7a8a');R(2,-4,18,3,'#ff9a2a');R(-4,-24,3,20,'#8a8f9a');R(-6,-26,8,3,'#3a3f4a');R(4,-12,10,7,'#9aa4b4');R(6,-10,6,3,'#ffd23f')}
+ else if(k==='pallet'){
+  drawChar(c,x-fl*16*u,y,u,HZ_PERSON('#d9a43a','#2a2a3a'),fl>0?'r':'l',mv?Math.floor(t*8)%4:0);
+  R(-2,-4,28,4,'#ffb02a');R(0,-14,24,10,'#a8763a');R(2,-13,9,8,'#c8964a');R(13,-13,9,8,'#c8964a');R(-5,-22,3,20,'#8a8f9a');R(0,-6,3,6,'#2a2a3a');R(21,-6,3,6,'#2a2a3a')}
+ else if(k==='car'){
+  R(-28,-20,56,15,col||'#d6283b');R(-15,-30,30,11,col||'#d6283b');R(-12,-28,24,8,'#bfe8ff');R(-26,-12,52,2,'rgba(0,0,0,.2)');R(-22,-6,10,7,'#111');R(12,-6,10,7,'#111');
+  R(26,-16,3,5,(mv&&Math.floor(t*6)%2)?'#fff':'#9a9a9a');R(-29,-16,2,5,'#ff3030')}
+ else if(k==='ball'){const a=t*8;c.fillStyle='#fff';c.beginPath();c.arc(x,y-7*u,7*u,0,7);c.fill();c.strokeStyle='#c8ccd6';c.lineWidth=Math.max(1,u);c.stroke();c.fillStyle='#b9bfcc';for(let i=0;i<4;i++){const an=a+i*1.6;c.beginPath();c.arc(x+Math.cos(an)*3.5*u,y-7*u+Math.sin(an)*3.5*u,1.1*u,0,7);c.fill()}}
+}
+/* grid helpers for the new levels: terrain letters are lowercase, solid objects are uppercase */
+function mkGrid(w,h,def){return{w,h,def,t:Array.from({length:h},()=>Array(w).fill(def)),o:Array.from({length:h},()=>Array(w).fill(''))}}
+function rect(g,x,y,w,h,ch){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||j<0||i>=g.w||j>=g.h)continue;if(ch>='A'&&ch<='Z')g.o[j][i]=ch;else g.t[j][i]=ch}}
+const OBJ={
+ S:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS,r=W.r;shadow(g,X+16,Y+31,15,3,.2);g.fillStyle='#7a5230';g.fillRect(X,Y+2,TS,TS-2);g.fillStyle='#5a3a1c';g.fillRect(X,Y+15,TS,3);g.fillRect(X,Y+2,TS,3);
+  for(let row=0;row<2;row++)for(let i=0;i<3;i++){g.fillStyle=['#ff7ab0','#ffd23f','#6b8cff','#a6ff5c','#ff8a3d','#1de9d2'][(r()*6)|0];g.fillRect(X+2+i*10,Y+6+row*13,8,9)}},
+ C:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;g.fillStyle='#d6eef7';g.fillRect(X,Y,TS,TS);g.fillStyle='#9ad4f2';g.fillRect(X+3,Y+3,TS-6,TS-6);g.fillStyle='rgba(255,255,255,.5)';g.fillRect(X+5,Y+5,8,TS-12);g.fillStyle='#7a8ea0';g.fillRect(X,Y+TS-3,TS,3)},
+ M:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+31,15,3,.2);g.fillStyle='#2a2a3a';g.fillRect(X,Y+4,TS,TS-4);g.fillStyle='#8a8f9a';g.fillRect(X,Y+4,TS,6);g.fillStyle='#1de9d2';g.fillRect(X+8,Y+14,8,6)},
+ D:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;g.fillStyle='#e8e0d0';g.fillRect(X,Y,TS,TS);g.fillStyle='#bfe8ff';g.fillRect(X+2,Y+8,TS-4,TS-12);g.fillStyle='rgba(255,255,255,.5)';g.fillRect(X+4,Y+10,10,TS-18);g.fillStyle='#d9803a';g.fillRect(X+6,Y+18,6,5);g.fillRect(X+16,Y+18,6,5)},
+ T:(W,x,y)=>tree(W,x,y,false),P:(W,x,y)=>tree(W,x,y,true),
+ L:(W,x,y)=>prop(W,'lamp',x,y),B:(W,x,y)=>prop(W,'bin',x,y),
+ F:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+30,15,3,.18);g.fillStyle='#9a6b3a';g.fillRect(X,Y+13,TS,3);g.fillRect(X,Y+21,TS,3);g.fillStyle='#7a5226';g.fillRect(X+12,Y+8,6,22);g.fillStyle='#b8834a';g.fillRect(X+12,Y+8,6,2)},
+ X:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+31,14,3,.22);g.fillStyle='#8a6a3a';g.fillRect(X+2,Y+6,TS-4,TS-8);g.fillStyle='#5a4220';g.fillRect(X+2,Y+6,TS-4,3);g.fillRect(X+14,Y+6,3,TS-8)},
+ R:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+30,14,4,.2);[['#2c7a3a',16,20,13],['#369448',11,17,9],['#45ab55',21,16,8]].forEach(([c,a,b,r])=>{g.fillStyle=c;g.beginPath();g.arc(X+a,Y+b,r,0,7);g.fill()})},
+ O:(W,x,y)=>{sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+30,10,3,.25);g.fillStyle='#6a4a2a';g.fillRect(X+8,Y+4,16,26);g.fillStyle='#8a6238';g.fillRect(X+8,Y+4,5,26);g.fillStyle='#4a3018';g.fillRect(X+8,Y+4,16,4)}
+};
+function gridWorld(g,seed){
+ const W=newWorld(g.w,g.h,seed,g.def);
+ for(let y=0;y<g.h;y++)for(let x=0;x<g.w;x++){W.t[y][x]=g.t[y][x];if('wv'.includes(g.t[y][x]))W.s[y][x]=1}
+ paintTerrain(W);
+ for(let y=0;y<g.h;y++)for(let x=0;x<g.w;x++){const o=g.o[y][x];if(o&&OBJ[o])OBJ[o](W,x,y)}
+ return W}
+/* icon on a little table, and a sign post. Tile coords. */
+function icon(W,x,y,e,bg){sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+30,13,4,.25);g.fillStyle=bg||'#6b4a2a';g.fillRect(X+4,Y+14,24,16);g.fillStyle='rgba(255,255,255,.22)';g.fillRect(X+4,Y+14,24,3);
+ g.font='22px "Apple Color Emoji","Segoe UI Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#000';g.fillText(e,X+16,Y+6)}
+function post(W,x,y,t,bg,fg){sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+31,9,3,.25);g.fillStyle='#4a3018';g.fillRect(X+14,Y+8,4,24);sign(g,t,X+16,Y-2,Math.max(48,t.length*9+8),20,bg||'#d9c9a0',fg||'#2a1a0a',14)}
+function boat(W,x,y,col){const g=W.g,X=x*TS,Y=y*TS;shadow(g,X,Y+10,34,8,.3);g.fillStyle=col;g.beginPath();g.ellipse(X,Y,32,13,0,0,7);g.fill();g.fillStyle='rgba(255,255,255,.35)';g.beginPath();g.ellipse(X,Y-2,26,8,0,0,7);g.fill();g.fillStyle='#4a2e18';g.fillRect(X-24,Y-2,48,3)}
+function doorSign(W,x,y,n){const g=W.g,X=x*TS,Y=y*TS;g.fillStyle='#5a1f2a';g.fillRect(X+2,Y-.8*TS,TS-4,1.6*TS);g.fillStyle='#7a2a38';g.fillRect(X+5,Y-.8*TS+4,TS-10,1.6*TS-8);g.fillStyle='#ffd23f';g.fillRect(X+TS-9,Y,3,3);sign(g,String(n),X+16,Y-1.0*TS,22,16,'#fff7c0','#7a1a1a',13)}
+/* level data. Level 1 wraps the zoo; levels 2-6 use the grid maps. */
+const NS=(skin,hair,shirt,pants,acc,more)=>({skin,hair,shirt,pants,acc:acc||'none',...more});
+const NPC=(id,name,x,y,dir,st,lines,again,clues,more)=>({id,name,x,y,dir,st,lines,again,clues:clues||[],...more});
+const SPOT=(id,name,x,y,lines,again,clues)=>({id,name,x,y,lines,again,clues:clues||[]});
+const SLK={mud:['28,12,6','255,230,160'],water:['18,56,110','200,235,255'],slime:['24,76,66','220,255,230'],pink:['150,40,90','255,215,235'],oil:['10,10,22','180,160,255']};
+const KO="Easy, rookie. You're patched up. That knock cost you 50 points";
+/* ---------- level 1 ---------- */
+const L1={...LEVEL1,n:LEVEL1.name,p:LEVEL1.place,d:LEVEL1.dev,tier:1,live:true,clues:CLUES,npcs:ZOO.npcs,
+ spots:[...ZOO.spots.map(s=>({...s,zone:'zoo'})),...ZOO.shopSpots.map(s=>({...s,zone:'shop'}))],caps:ZOO.caps,
+ build:()=>({zoo:buildZoo(),shop:buildShop()}),start:{zone:'zoo',x:19.5,y:28.6,dir:'u'},
+ doors:[{z:'zoo',r:[30.8,10,32.2,11.4],to:'shop',tx:8.9,ty:10.0,dir:'u'},{z:'shop',r:[8,10.75,10,12],to:'zoo',tx:31.5,ty:11,dir:'d'}],
+ zoneCap:{shop:"Gator Gifts. Smells like sunscreen and bad decisions."},slickCol:'mud',
+ slicks:[[16.5,14.2,'zoo'],[22,14.3,'zoo'],[27.5,14.2,'zoo'],[31,12.8,'zoo'],[19.5,23.6,'zoo'],[10.6,8.2,'shop']],
+ rogues:[{k:'flamingo',z:'zoo',w:[[17.5,22.6],[25,22.6]]},{k:'flamingo',z:'zoo',w:[[14,16.6],[24,17]]},{k:'flamingo',z:'zoo',w:[[29,24],[35,24.4]]}],
+ warn:'Loose flamingo! It will charge. Run, or put a wall between you.',
+ ko:KO+" and your last note got trampled. Go and ask again."};
+/* ---------- level 2: Swamp Mart ---------- */
+function buildMart(){
+ const g=mkGrid(36,24,'f');
+ rect(g,0,0,36,3,'v');rect(g,0,0,1,24,'v');rect(g,35,0,1,24,'v');rect(g,0,23,36,1,'v');rect(g,2,3,5,3,'v');
+ rect(g,25,3,9,2,'D');
+ rect(g,3,7,10,2,'S');rect(g,16,7,5,2,'S');rect(g,24,7,9,2,'S');
+ rect(g,3,12,6,2,'S');rect(g,12,12,9,2,'S');rect(g,24,12,9,2,'S');
+ rect(g,3,16,9,2,'S');rect(g,24,16,9,2,'S');
+ rect(g,4,19,2,1,'M');rect(g,8,19,2,1,'M');rect(g,12,19,2,1,'M');rect(g,33,8,2,8,'C');rect(g,33,18,2,4,'C');
+ const W=gridWorld(g,21),c=W.g;
+ c.fillStyle='#9ad4f2';c.fillRect(16*TS,23*TS-2,4*TS,TS+2);c.strokeStyle='#fff';c.lineWidth=2;c.beginPath();c.moveTo(17*TS,23*TS);c.lineTo(17.6*TS,24*TS);c.moveTo(18.4*TS,23*TS);c.lineTo(18.9*TS,24*TS);c.stroke();
+ sign(c,'SWAMP MART',18*TS,1.2*TS,9*TS,1.1*TS,'#c93f4c','#fff',30);sign(c,'DELI',29*TS,2.7*TS,2*TS,.7*TS,'#14602f','#ffd23f',16);sign(c,'SECURITY',4.5*TS,3.6*TS,2.8*TS,.6*TS,'#1a1a2a','#1de9d2',14);
+ post(W,14,21,'OPEN 24 HRS','#c93f4c','#fff');icon(W,4,6,'📺','#3a3a4a');icon(W,23,4,'🍗','#8a5a30');icon(W,20,21,'🚪','#5a6a7a');icon(W,31,6,'🧊','#7a8ea0');
+ return {main:W}}
+const L2={id:2,n:'Swamp Mart, 5 AM',p:'24-hour supermarket',d:['statistic'],dev:['statistic'],tier:1,live:true,
+ title:['Saturday, 5:02 AM','Swamp Mart'],
+ call:[{t:"Rookie. Here's the story. It's five in the morning and a supermarket has been robbed.",ch:["Who robs a supermarket at 5 AM?","I'm up. I'm very up."]},
+  {t:"Swamp Mart. Something with wings flew through the automatic doors and left with the deli."},
+  {t:"Readers trust numbers. A real statistic makes a headline feel official. How many, how much, how long."},
+  {t:"But here's the trap. Everybody at the scene has a number, and half of them are made up."},
+  {t:"Check where each number comes from. Did somebody count it, or just feel it?"},
+  {t:"Bring me one real number and a headline that shouts. Mags out."}],
+ reply:["Someone very hungry. Keep listening.","Good. Coffee's on you."],
+ filecall:"Okay rookie, what have you got? This one needs a statistic. A real number from the story, one you can prove. Make it shout.",
+ clues:{
+  F1:{src:'Priya, night stocker. She was in aisle 3 when it happened.',t:'fact',txt:'At 5 am on Saturday a pelican flew through the automatic doors of Swamp Mart.',tiles:['Pelican','Strikes','Swamp Mart','Saturday']},
+  F2:{src:'Moe, deli worker. He counted the empty hooks.',t:'fact',txt:'It made off with 12 rotisserie chickens from the deli counter.',tiles:['12|n','Chickens','Rotisserie','Steals']},
+  F3:{src:'Dee Ortiz, store manager. She checked the till records.',t:'fact',txt:'The stolen chickens were worth $86 in total.',tiles:['$86|n','Worth','Stolen']},
+  F4:{src:'The security monitor. The camera footage was rewound.',t:'fact',txt:'CCTV shows the raid lasted just 4 minutes.',tiles:['4|n','Minutes','CCTV','Raid']},
+  F5:{src:'Dee Ortiz, store manager.',t:'fact',txt:'Manager Dee Ortiz says the doors will now stay locked overnight.',tiles:['Manager','Doors','Locked']},
+  R1:{src:'Linda, a shopper. She only heard about it later.',t:'rumour',txt:"A shopper says the pelican took '100 chickens'.",tiles:['100|n','Hundreds']},
+  R2:{src:'Kev, cashier. He is guessing.',t:'rumour',txt:"A cashier says there was 'a million dollars' of damage.",tiles:['$1,000,000|n','Millions']},
+  J1:{src:'The sign by the entrance.',t:'junk',txt:'Swamp Mart is open 24 hours a day.',tiles:['24|n','Hours','Open']},
+  J2:{src:'Moe, deli worker. He was joking.',t:'junk',txt:"Deli staff joke they were just 'winging it'.",tiles:['Wing-It|p','Wings']}},
+ npcs:[
+  NPC('dee','Dee Ortiz',18.5,19.8,'d',NS('#c98e62','#2a1a14','#c93f4c','#2a2a3a','badge'),
+   ["Thank goodness, the press. Dee Ortiz, store manager. It's 5 AM and I have glass in my shoes.","Mind the night crew. The floor buffer and the pallet jack run along the yellow lanes. The wet floors are slippery, too.",{clue:'F3'},"We're locking those doors overnight from now on. Learned that the hard way.",{clue:'F5'},"Talk to everyone. Priya was in aisle three. Moe runs the deli."],["Priya's in aisle three, Moe's at the deli. Go on."],['F3','F5']),
+  NPC('priya','Priya',6,10.3,'r',NS('#9a6540','#1e1410','#6b4fd8','#2a2a3a','clip'),
+   ["Priya, night stocker. I was stacking beans when something huge went WHOOSH over my head.",{clue:'F1'},"I've seen birds in here before. Never one with a plan."],["Beans. Stacking beans. That's my whole night."],['F1']),
+  NPC('moe','Moe',29.5,5.6,'d',NS('#e8b098','#5a3a1a','#f4f4f4','#3a3a3a','apron',{hat:'#fff'}),
+   ["Moe, deli. Twelve chickens, golden and warm. And now twelve empty hooks.",{clue:'F2'},"Staff are saying we were all just winging it. Get it? Winging it? I made that joke at 5 AM and I stand by it.",{clue:'J2'}],["Twelve hooks. Empty. I counted twice."],['F2','J2']),
+  NPC('linda','Linda',30,10.3,'l',NS('#f6d0b0','#9a5a22','#ff8a3d','#3a7ac8','shades'),
+   ["Linda. I wasn't actually here, but my neighbour was and she told me everything.",{clue:'R1'},"Take it from me, that bird took the whole shop."],["A hundred chickens. At least."],['R1']),
+  NPC('kev','Kev',7.5,21.2,'u',NS('#f0c8a0','#1e1410','#6b8cff','#2a3a4a','badge'),
+   ["Kev, cashier. I was on break. But look at that glass, it has to be a fortune.",{clue:'R2'},"Honestly? I'm just guessing. But it feels like a lot."],["Just guessing. Sorry."],['R2']),
+  NPC('raul','Raul',8.5,5.6,'l',NS('#8d5a3c','#1a1210','#2a2a4a','#1a1a2a','badge',{hat:'#2a2a4a'}),
+   ["Raul, security. I rewound the tape three times. The bird was fast. Very fast.","Check the monitor if you want the exact timing. I don't give numbers from memory."],["The monitor never lies, rookie."],[])],
+ spots:[
+  SPOT('cctv','Security monitor',4.5,6.8,["The CCTV footage, paused on a pelican mid-flap. A timestamp runs in the corner.",{clue:'F4'}],["Frozen on the pelican. It looks pleased."],['F4']),
+  SPOT('rack','Empty rack',23.5,4.8,["The rotisserie rack. A pile of foil and a single feather."]),
+  SPOT('open','Entrance sign',14.5,21.8,["The sign by the door.",{clue:'J1'}],["Open 24 hours. Just not tonight."],['J1']),
+  SPOT('glass','Broken doors',20.5,21.8,["The automatic doors, cracked open. Feathers on the mat."]),
+  SPOT('freezer','Freezer',31.5,6.8,["A freezer full of fish fingers. The pelican did not touch them. Curious."])],
+ caps:[{x:18,y:21,w:3,h:2,t:"Swamp Mart. The doors are cracked, the lights hum, and it's 5 AM."}],
+ doors:[],start:{zone:'main',x:18,y:21.6,dir:'u'},build:buildMart,slickCol:'water',
+ slicks:[[17,10,'main'],[27,10,'main'],[12,14.8,'main'],[26,20.4,'main'],[19,14.6,'main'],[8,10.6,'main']],
+ rogues:[],haz:[
+  {type:'rail',k:'buffer',w:[[5,10],[31,10]],sp:1.5,pause:1.4,box:[1.0,.6],msg:'Night cleaner with a floor buffer! Stay off the yellow lane while it moves.'},
+  {type:'rail',k:'pallet',w:[[31,15],[5,15]],sp:2.0,pause:1.6,box:[1.1,.6],msg:'Stock clerk with a pallet jack! Watch the yellow lane.'}],
+ warn:'Runaway cart! It will charge you. Dodge sideways.',ko:KO+" and a note slid out of your pocket. Ask again."};
+/* ---------- level 3: Dead Duck Marina ---------- */
+function buildMarina(){
+ const g=mkGrid(36,24,'s');
+ rect(g,0,0,36,10,'w');[[6,2],[16,2],[26,2]].forEach(([x,y])=>rect(g,x,y,4,9,'k'));
+ rect(g,2,10,32,4,'k');rect(g,16,14,4,9,'p');
+ rect(g,0,23,36,1,'F');rect(g,0,10,1,14,'F');rect(g,35,10,1,14,'F');
+ [[2,15],[33,15],[2,21],[33,21]].forEach(([x,y])=>rect(g,x,y,1,1,'P'));
+ const W=gridWorld(g,31);
+ building(W,4,16,8,5,{wall:'#d9b27a',roof:'#2b6f9a',rh:1.8,win:[1,5],ww:1.4,awn:[.5,7],awnc:'#ffd23f',sign:'BAIT & TACKLE',sw:190,sbg:'#14405a',sfg:'#ffd23f',sfs:20});
+ building(W,23,16,5,4,{wall:'#e8dcc0',roof:'#a8452e',rh:1.6,win:[.8],ww:1.4,sign:'WEIGH-IN',sw:110,sbg:'#2a3a5a',sfg:'#fff',sfs:17});
+ boat(W,12,5.5,'#d6283b');boat(W,22,6,'#2b86c9');boat(W,32,5,'#ffd23f');boat(W,2.5,6,'#f4f4f4');
+ post(W,13,15,'CLOSES 8 PM','#e8dcc0','#2a1a0a');post(W,3,12,'DOCK FEE $15','#e8dcc0','#2a1a0a');
+ icon(W,25,21,'⚖️','#6b4a2a');icon(W,9,22,'🎣','#6b4a2a');icon(W,14,22,'🥫','#4a5a6a');icon(W,30,20,'🪣','#6b4a2a');
+ return{main:W}}
+const L3={id:3,n:'Dead Duck Marina',p:'Fishing marina',d:['alliteration','hyperbole'],dev:['alliteration','hyperbole'],tier:2,live:true,
+ title:['Sunday, 6:40 PM','Dead Duck Marina'],
+ call:[{t:"Rookie! There's a fish story at Dead Duck Marina. And I do mean a FISH story.",ch:["Is it a big fish?","Do I have to smell like bait?"]},
+  {t:"A fisherman hooked something enormous off the end of the dock. Half the marina has an opinion about it."},
+  {t:"This time I want TWO devices. Alliteration, and hyperbole. Hyperbole means deliberate exaggeration."},
+  {t:"Here's the good news. Hyperbole is the one place a witness's wild claim can go. Everything else has to be solid."},
+  {t:"So build on facts first. Then pile on the drama. A headline like 'Dead Duck Dale Drags Dino-Sized Fish' does both."},
+  {t:"Go and talk to the dock. Mags out."}],
+ reply:["Huge, apparently. The dock is losing its mind.","Yes. Bring a peg for your nose."],
+ filecall:"Let's hear it. Alliteration and hyperbole. Lead with solid facts, then pile on the drama. The exaggeration is the only thing allowed to be wild.",
+ clues:{
+  F1:{src:'Dale Dunn, the fisherman. It was his catch.',t:'fact',txt:'Dale Dunn hooked a 9 kg catfish at Dead Duck Marina on Sunday.',tiles:['Dale','Dunn','Dead Duck','Catfish','Hooks']},
+  F2:{src:'Gil, harbour master. He timed it from his office window.',t:'fact',txt:'It took him 40 minutes to reel it in off the end of the dock.',tiles:['Drags','Dock','Reels','40|n']},
+  F3:{src:'Marge, who runs the weigh-in.',t:'fact',txt:'The fish was weighed on the marina scales: 9 kg exactly.',tiles:['Weighed','Scales','9kg|n']},
+  F4:{src:'Dale Dunn, the fisherman.',t:'fact',txt:"Dale's dog, Duke, barked the whole time.",tiles:['Duke','Dog','Barks']},
+  R1:{src:'Old Pete. He was fishing three piers away.',t:'rumour',txt:"A fisherman says it was 'the size of a submarine!'",tiles:['Submarine-Sized|h','Sub-Zero']},
+  R2:{src:'Skip, a bystander. He heard it second-hand.',t:'rumour',txt:"A bystander says it was 'the biggest fish in the history of the world!'",tiles:['Dino-Sized|h','Legendary|h','Biggest-Ever|h']},
+  J1:{src:'The sign by the boardwalk.',t:'junk',txt:'The marina closes at 8 pm.',tiles:['Closes','Marina']},
+  J2:{src:'The dock fee sign.',t:'junk',txt:'Dock fees are $15 a night.',tiles:['$15|n','Fees']}},
+ npcs:[
+  NPC('gil','Gil',17.5,19.2,'d',NS('#c98e62','#c9c9d8','#2b6f9a','#2a3a4a','badge',{hat:'#1a2a4a'}),
+   ["Gil, harbour master. Welcome to Dead Duck Marina. The seagulls are in a mood today, so watch your head.","The planks are slimy too, so watch your step.",{clue:'F2'},"Dale's out on the middle pier. Marge has the scales by the weigh-in."],["Dale's on the middle pier, Marge is at the weigh-in."],['F2']),
+  NPC('dale','Dale Dunn',17.5,4.4,'d',NS('#e8b098','#9a5a22','#d6283b','#2a3a5a','none',{hat:'#e8dcc0'}),
+   ["Dale Dunn! Forty years fishing this marina, never seen a thing like it.",{clue:'F1'},"And my dog Duke barked the entire time. Loudest dog in the county.",{clue:'F4'},"Ask Marge to confirm the weight. I'm not a liar. I'm just excited."],["Ask Marge for the weight, rookie."],['F1','F4']),
+  NPC('marge','Marge',26,20.4,'u',NS('#f0c8a0','#6b4fd8','#1aa89a','#2a3a4a','apron'),
+   ["Marge. I run the weigh-in. Put that fish on my scales myself.",{clue:'F3'},"Biggest catfish this season, but nobody here gets to say 'biggest ever' with a straight face."],["Nine kilos, on the dot."],['F3']),
+  NPC('pete','Old Pete',7.5,5.2,'d',NS('#e8b098','#c9c9d8','#5a6a3a','#4a3a2a','none',{hat:'#8a7a4a'}),
+   ["Old Pete. I was three piers over, but I saw the splash.",{clue:'R1'},"Heck of a fish. Heck of a splash."],["The size of a submarine."],['R1']),
+  NPC('skip','Skip',27.5,5.2,'d',NS('#d9a074','#1e1410','#ff8a3d','#3a7ac8','shades'),
+   ["Skip. I wasn't on the dock, but the guy next to me told me.",{clue:'R2'},"Trust me, everybody's talking about it."],["Biggest fish. In the world. Ever."],['R2']),
+  NPC('jo','Jo',12.5,12,'r',NS('#c98e62','#1e1410','#ffd23f','#ff3d8b','none',{kid:1}),
+   ["I ate a corn dog and fell off the dock. Twice."],["Corn dogs are the best."],[])],
+ spots:[
+  SPOT('hours','Hours sign',13.5,15.8,["A sign by the boardwalk.",{clue:'J1'}],["Closes at 8. Nobody follows it."],['J1']),
+  SPOT('fee','Fee sign',3.5,12.8,["Another sign.",{clue:'J2'}],["Fifteen dollars. Per night."],['J2']),
+  SPOT('scales','Scales',25.5,21.8,["The marina scales. A smear of slime on the dial."]),
+  SPOT('rod','Fishing rods',9.5,22.9,["A rack of fishing rods. One is bent in half."]),
+  SPOT('cans','Bait cans',14.5,22.9,["Tins of bait. They smell exactly how you'd expect."]),
+  SPOT('bucket','Bucket',30.5,20.9,["A bucket of fish. A crab is trying to escape."])],
+ caps:[{x:17.5,y:21,w:4,h:2,t:"Dead Duck Marina. Seagulls, salt and a fishing story."}],doors:[],start:{zone:'main',x:17.5,y:21.6,dir:'u'},build:buildMarina,slickCol:'slime',
+ slicks:[[10,11.8,'main'],[24,12,'main'],[17.5,7.5,'main'],[7.5,8.5,'main'],[27.5,8,'main']],
+ rogues:[],haz:[
+  {type:'swoop',k:'gull',home:[9,11.5],range:9,msg:'Gull on a dive! A red circle shows where it will land. Step out of it.'},
+  {type:'swoop',k:'gull',home:[26,11.5],range:9}],
+ warn:'Dive-bombing seagull! It will charge. Outrun it or duck round a building.',ko:KO+" and a note blew into the water. Ask again."};
+/* ---------- level 4: Palmetto Trailer Park ---------- */
+function buildPark(){
+ const g=mkGrid(36,24,'n');
+ rect(g,1,10,34,3,'a');rect(g,16,2,3,21,'a');
+ rect(g,0,0,36,1,'T');rect(g,0,23,36,1,'T');rect(g,0,0,1,24,'T');rect(g,35,0,1,24,'T');
+ [[13,2],[32,2],[13,20],[30,20],[12,8],[33,14],[2,21]].forEach(([x,y])=>rect(g,x,y,1,1,'P'));
+ const W=gridWorld(g,41);
+ [[3,3,'#e8ecf2','#7a8ba3'],[22,3,'#f0e8c8','#c4402e'],[3,15,'#cfe6e0','#2b8a7a'],[22,15,'#f2d8e8','#8a4a9a']].forEach(([x,y,w,r],i)=>building(W,x,y,6,4,{wall:w,roof:r,rh:1.2,win:[.6,3.6],ww:1.3,door:2.5,sign:['No. 1','No. 2','No. 3','No. 4'][i],sw:70,sbg:'#fff',sfg:'#2a1a0a',sfs:14}));
+ icon(W,10,6,'🦜','#6b4a2a');icon(W,13,8,'💻','#7a5a3a');post(W,20,19,'QUIET HOURS 10 PM','#e8dcc0','#2a1a0a');icon(W,10,15,'🍖','#4a4a5a');icon(W,29,8,'📬','#4a5a6a');icon(W,30,14,'🛻','#6b4a2a');
+ return{main:W}}
+const L4={id:4,n:'Palmetto Trailer Park',p:'Trailer park',d:['slang','statistic'],dev:['slang','statistic'],tier:2,live:true,
+ title:['Monday, 9:15 AM','Palmetto Trailer Park'],
+ call:[{t:"Rookie. A parrot has sold a golf cart. Online. Do not make me say it twice.",ch:["A parrot did WHAT?","Is this a prank?"]},
+  {t:"Palmetto Trailer Park. A parrot called Biscuit listed his owner's golf cart for sale and somebody bought it."},
+  {t:"I want slang AND a statistic. Slang means casual words and nicknames, the way people actually talk."},
+  {t:"Tabloids love a nickname. If the neighbours have given somebody a name, that's gold."},
+  {t:"But check the numbers. A parrot sale is a gift to rumours. Everyone has a different price."},
+  {t:"Go and get me bucks, birds and facts. Mags out."}],
+ reply:["Sold it. On the internet. Go and see.","I wish. Go and see."],
+ filecall:"Right, what do you have? Slang and a statistic. A nickname or casual word from someone's actual quote, plus a number you can prove. And do not print the rumour price.",
+ clues:{
+  F1:{src:'Rita Cole, the cart owner. It was her cart.',t:'fact',txt:"Biscuit, a 3-year-old parrot, listed Rita Cole's golf cart for sale online on Monday.",tiles:['Parrot','Biscuit','Rita','Golf Cart','Sells']},
+  F2:{src:'The online sale receipt on the laptop.',t:'fact',txt:'It sold for $350 to a buyer in Tampa.',tiles:['$350|n','Buyer','Tampa']},
+  F3:{src:'Rita Cole, the cart owner.',t:'fact',txt:"Rita says the whole thing was 'totally bonkers'.",tiles:['Bonkers|s','Totally']},
+  F4:{src:'Buzz, a neighbour. He is the one who started it.',t:'fact',txt:"Neighbours now call Biscuit 'the Wall Street Bird'.",tiles:['Wall Street Bird|s','Neighbours']},
+  F5:{src:'Rita Cole. She saw the cash.',t:'fact',txt:"The buyer paid cash, or 'three hundred and fifty bucks' as Rita put it.",tiles:['Bucks|s','Cash','Paid']},
+  R1:{src:'Dolores, a neighbour. She never saw the receipt.',t:'rumour',txt:"A neighbour says it sold for '$3,500'.",tiles:['$3,500|n','Fortune']},
+  R2:{src:'Earl, a neighbour. He heard it at the bar.',t:'rumour',txt:"Someone heard Biscuit also sold '40 other carts'.",tiles:['40|n','Empire']},
+  J1:{src:'The park rules post.',t:'junk',txt:'Park rules: quiet hours start at 10 pm.',tiles:['10|n','Quiet']},
+  J2:{src:'Tiny, a kid. He was joking.',t:'junk',txt:"A kid joked it was 'a tweet deal'.",tiles:['Tweet Deal|p']}},
+ npcs:[
+  NPC('lou','Lou',17.5,19.6,'d',NS('#c98e62','#c9c9d8','#5a6a3a','#4a3a2a','badge',{hat:'#8a7a4a'}),
+   ["Lou, park manager. Welcome to Palmetto. Yes, the parrot thing is real.","Watch out for the chained dogs. A chain only reaches so far, so stay outside the red ring. And keep an eye out for Brock, the kid with a slingshot. He's a pest.","Rita's at Number 1. Everyone else has an opinion."],["Rita's at Number 1, rookie."],[]),
+  NPC('rita','Rita Cole',6,8.2,'d',NS('#f0c8a0','#d9b35a','#ff3d8b','#3a7ac8','shades'),
+   ["Rita Cole. My golf cart is gone and my parrot is a criminal.",{clue:'F1'},"I came home and it was just... gone. Totally bonkers.",{clue:'F3'},"The guy paid in cash. Three hundred and fifty bucks. In my own driveway.",{clue:'F5'},"Check the laptop on the picnic table if you don't believe me."],["Check the laptop. It's all on there."],['F1','F3','F5']),
+  NPC('buzz','Buzz',25.5,8.2,'d',NS('#8d5a3c','#1a1210','#ffd23f','#2a3a4a','none',{hat:'#2a2a4a'}),
+   ["Buzz. I run the barbecue. I started calling Biscuit that bird's nickname the second I heard.",{clue:'F4'},"He's the Wall Street Bird now. No one can stop me."],["The Wall Street Bird."],['F4']),
+  NPC('dolores','Dolores',6,13.8,'r',NS('#f6d0b0','#9a5a22','#1de9d2','#5a3a7a','glasses'),
+   ["Dolores. Didn't see the receipt. But I heard a number.",{clue:'R1'},"A fortune. A life-changing fortune."],["Thirty-five hundred. Probably."],['R1']),
+  NPC('earl','Earl',25.5,13.8,'l',NS('#e8b098','#c9c9d8','#a6ff5c','#3a3a3a','visor'),
+   ["Earl. I heard it at the bar last night.",{clue:'R2'},"Honestly, I can't remember who told me."],["Forty carts. Maybe fifty."],['R2']),
+  NPC('tiny','Tiny',21.5,19.5,'l',NS('#c98e62','#1e1410','#ff8a3d','#3a7ac8','none',{kid:1}),
+   ["It's a tweet deal! Get it? Because it's a bird? And a deal?",{clue:'J2'}],["It's a tweet deal."],['J2'])],
+ spots:[
+  SPOT('perch',"Biscuit's perch",10.5,6.9,["Biscuit's perch. Biscuit himself is staring at you with one very smug eye."]),
+  SPOT('laptop','Laptop on picnic table',13.5,8.9,["Rita's laptop, still open on the sale page.",{clue:'F2'}],["The sale page. Sold. Tampa."],['F2']),
+  SPOT('rules','Rules post',20.5,19.9,["The park rules, hand-painted.",{clue:'J1'}],["Quiet hours. Nobody follows them."],['J1']),
+  SPOT('bbq','Barbecue',10.5,16,["Buzz's barbecue. It smells fantastic. Don't touch."]),
+  SPOT('mail','Mailbox',29.5,8.9,["A mailbox full of flyers. One says 'MISSING: Golf Cart'. It has been crossed out."]),
+  SPOT('truck','Pickup truck',30.5,14.9,["A rusty pickup. There's a 'Honk if you love parrots' bumper sticker. Somebody honked."])],
+ caps:[{x:17.5,y:21,w:4,h:2,t:"Palmetto Trailer Park. Where the neighbours know everything and half of it is wrong."}],doors:[],start:{zone:'main',x:17.5,y:21.6,dir:'u'},build:buildPark,slickCol:'water',
+ slicks:[[9,11.5,'main'],[27,11.5,'main'],[17.5,6,'main'],[17.5,15.5,'main'],[13,11.4,'main']],
+ rogues:[],haz:[
+  {type:'tether',x:21,y:8.5,r:2.8,msg:'Chained dog! It can only reach as far as its chain. Stay outside the red ring.'},
+  {type:'tether',x:12,y:14.2,r:2.6},
+  {type:'tether',x:28,y:17.5,r:2.6},
+  {type:'bully',x:11,y:19.8,msg:"Brock with a slingshot! He won't cost you cred, but his pebbles knock you off your feet."}],
+ warn:'Loose dog! It will chase you. Run, or put a trailer between you.',ko:KO+" and a note went missing. Ask again."};
+/* ---------- level 5: Putt-Putt Palace ---------- */
+function buildGolf(){
+ const g=mkGrid(36,24,'q');
+ rect(g,2,11,32,2,'p');rect(g,17,6,2,17,'p');
+ rect(g,5,4,4,3,'w');rect(g,27,4,4,3,'w');rect(g,5,16,4,3,'w');rect(g,27,16,4,3,'w');
+ rect(g,0,0,36,1,'F');rect(g,0,23,36,1,'F');rect(g,0,0,1,24,'F');rect(g,35,0,1,24,'F');
+ [[12,15],[13,15],[22,15],[23,15],[12,8],[24,9],[3,9],[32,9],[3,21],[32,21],[11,20],[25,20]].forEach(([x,y])=>rect(g,x,y,1,1,'R'));
+ [[2,2],[33,2],[2,21],[33,21]].forEach(([x,y])=>rect(g,x,y,1,1,'P'));
+ const W=gridWorld(g,51);
+ building(W,11,2,7,4,{wall:'#ffe9a8',roof:'#6b4fd8',rh:1.8,win:[.6,4.2],ww:1.4,door:3,awn:[.3,6.4],awnc:'#ff3d8b',sign:'PUTT-PUTT PALACE',sw:210,sbg:'#14602f',sfg:'#ffd23f',sfs:20});
+ building(W,21,3,3,4,{wall:'#f2f2f2',roof:'#c4302b',rh:1.6,win:[.8],ww:1.2,sign:'HOLE 9',sw:70,sbg:'#14602f',sfg:'#fff',sfs:14});
+ icon(W,10,6,'📺','#3a3a4a');icon(W,28,12,'⛳','#2a8a4a');post(W,20,21,'$8 A ROUND','#e8dcc0','#2a1a0a');post(W,25,8,'WINDMILL SPINS','#e8dcc0','#2a1a0a');icon(W,3,15,'🏆','#8a6a3a');icon(W,32,13,'📋','#6b4a2a');
+ return{main:W}}
+const L5={id:5,n:'Putt-Putt Palace',p:'Mini-golf course',d:['pun','question'],dev:['pun','question'],tier:3,live:true,
+ title:['Saturday, 7:30 AM','Putt-Putt Palace'],
+ call:[{t:"Rookie. There's been a heist at Putt-Putt Palace and nobody knows who did it.",ch:["A heist? At mini-golf?","What was stolen?"]},
+  {t:"Fourteen golf balls, gone overnight. The manager is furious. The town is delighted."},
+  {t:"I want a pun AND a rhetorical question. A pun is word play. A rhetorical question is asked for effect, so start with a question word and finish with a question mark."},
+  {t:"Puns love a golf course. 'Hole lot of trouble.' That sort of thing. But check who actually said what."},
+  {t:"Gossips will tell you it was a gang of squirrels. It wasn't. Stick to what the staff and the camera say."},
+  {t:"Go and ask the town what it's thinking. Mags out."}],
+ reply:["The gravest golf crime in county history. Go.","Fourteen golf balls. And their dignity."],
+ filecall:"Let's hear it. A pun AND a rhetorical question. Start with a question word, end with a question mark, and keep the pun from someone who actually said it.",
+ clues:{
+  F1:{src:'The security monitor. The camera caught it.',t:'fact',txt:'Rocky, a raccoon, was caught on camera at Putt-Putt Palace on Friday night.',tiles:['Raccoon','Rocky','Putt-Putt Palace','Camera']},
+  F2:{src:'Ben Kato, manager. He counts the balls every night.',t:'fact',txt:'He took 14 golf balls from the ninth hole.',tiles:['14|n','Golf Balls','Takes','Ninth Hole']},
+  F3:{src:'Jo, groundskeeper. She found them herself.',t:'fact',txt:'Staff found the balls stacked inside the windmill.',tiles:['Windmill','Stash','Staff']},
+  F4:{src:'Ben Kato, manager. These are his own words.',t:'fact',txt:"Manager Ben Kato joked it was 'a hole lot of trouble' and a 'ball-sy' burglary.",tiles:['Hole Lot|p','Ball-sy|p','Burglar']},
+  F5:{src:'Officer Lopez. It is in her report.',t:'fact',txt:'Nobody has been charged.',tiles:['Mystery','Unsolved']},
+  R1:{src:'Gloria, a guest. She is guessing.',t:'rumour',txt:"A guest claims Rocky works with 'a gang of 20 squirrels'.",tiles:['Gang','20|n']},
+  R2:{src:'Max, a kid. He is making it up.',t:'rumour',txt:"A kid says the raccoon 'hit a hole-in-one on purpose'.",tiles:['Hole-in-One|p']},
+  J1:{src:'The price post.',t:'junk',txt:'Mini-golf costs $8 a round.',tiles:['$8|n','Round']},
+  J2:{src:'The windmill sign.',t:'junk',txt:'The windmill spins every 3 seconds.',tiles:['Spins','Seconds']}},
+ npcs:[
+  NPC('pam','Pam',17.5,19.6,'d',NS('#f0c8a0','#6b4fd8','#1aa89a','#2a3a4a','visor'),
+   ["Pam, ticket booth. Welcome to Putt-Putt Palace. We're a crime scene. Sort of.","Careful on the paths. The ball launchers fire when the pad flashes red, and the windmill blades sweep the green. The sticky puddles are slippery.","Ben's the manager, up by the clubhouse. Officer Lopez is around too."],["Ben's up by the clubhouse."],[]),
+  NPC('ben','Ben Kato',15.5,7.2,'d',NS('#c98e62','#1a1210','#2a6bd8','#2a2a3a','badge',{hat:'#2a6bd8'}),
+   ["Ben Kato, manager. Fourteen golf balls, gone from the ninth hole. I counted them myself.",{clue:'F2'},"It's a hole lot of trouble, I tell you. A ball-sy burglary. I've been waiting all morning to say that.",{clue:'F4'},"Check the camera. Check the windmill."],["Fourteen balls. Gone."],['F2','F4']),
+  NPC('jo','Jo',20,9.4,'u',NS('#9a6540','#1e1410','#4a8a3a','#3a3a3a','none',{hat:'#4a8a3a'}),
+   ["Jo, groundskeeper. I found the balls this morning.",{clue:'F3'},"Stacked neat as a pyramid. Inside the windmill. Not bad for a raccoon."],["Inside the windmill."],['F3']),
+  NPC('lopez','Officer Lopez',24.5,13.6,'l',NS('#c98e62','#2a1a14','#3a5aa8','#2a2a4a','badge',{hat:'#3a5aa8'}),
+   ["Officer Lopez. I took the report. We have a suspect on camera.",{clue:'F5'},"But no charges. You can't exactly arrest a raccoon."],["Nobody has been charged."],['F5']),
+  NPC('max','Max',11,14,'r',NS('#f6d0b0','#9a5a22','#ff8a3d','#3a7ac8','none',{kid:1}),
+   ["Max. I saw him! He hit a hole-in-one. On purpose. I swear.",{clue:'R2'}],["Hole-in-one. On purpose."],['R2']),
+  NPC('gloria','Gloria',26,19,'l',NS('#f6d0b0','#c4382c','#c88bff','#3a3a3a','glasses'),
+   ["Gloria. Visiting from Ohio. Everyone knows he's got friends.",{clue:'R1'},"I read it on a sign somewhere. Probably."],["Squirrels, I tell you."],['R1'])],
+ spots:[
+  SPOT('cctv','Camera monitor',10.5,6.9,["The monitor in the clubhouse. A raccoon, caught mid-stride with a golf ball in each paw.",{clue:'F1'}],["The raccoon. Caught red-pawed."],['F1']),
+  SPOT('hole9','Ninth hole',28.5,12.8,["The ninth hole. An empty cup and a very small raccoon footprint."]),
+  SPOT('price','Price post',20.5,21.9,["The price post.",{clue:'J1'}],["Eight dollars. Cheap."],['J1']),
+  SPOT('wsign','Windmill sign',25.5,8.9,["A sign on the windmill.",{clue:'J2'}],["Spins every three seconds."],['J2']),
+  SPOT('trophy','Trophy shelf',3.5,15.9,["A dusty trophy. 'Hole-in-One Champion, 1998'. Not the raccoon."]),
+  SPOT('score','Scorecards',32.5,13.9,["A pile of scorecards. Nobody has scored on the ninth hole in years."])],
+ caps:[{x:17.5,y:21,w:4,h:2,t:"Putt-Putt Palace. Windmills, water hazards and fourteen missing golf balls."}],doors:[],start:{zone:'main',x:17.5,y:21.6,dir:'u'},build:buildGolf,slickCol:'pink',
+ slicks:[[9,11.8,'main'],[28,11.8,'main'],[17.8,15,'main'],[17.8,8.5,'main'],[24,12,'main']],
+ rogues:[],haz:[
+  {type:'sweep',k:'blades',x:22.5,y:5.4,len:3.4,n:4,sp:1.0,msg:'Windmill blades! They sweep the green. Time your run between them.'},
+  {type:'rail',k:'ball',oneway:1,w:[[2.5,12],[15.5,12]],sp:4.2,pause:3.2,box:[.6,.6],msg:'Ball launcher! When the pad flashes red, a ball rolls down the yellow lane.'},
+  {type:'rail',k:'ball',oneway:1,w:[[33,12.4],[20.5,12.4]],sp:4.2,pause:3.6,box:[.6,.6]},
+  {type:'rail',k:'ball',oneway:1,w:[[17.8,8],[17.8,21]],sp:4.0,pause:4,box:[.6,.6]}],
+ warn:'Rolling golf ball! It will charge you. Step out of its way.',ko:KO+" and a note rolled down the hole. Ask again."};
+/* ---------- level 6: Pine Palm Motel ---------- */
+function buildMotel(){
+ const g=mkGrid(36,24,'a');
+ rect(g,0,0,36,1,'T');rect(g,0,23,36,1,'T');rect(g,0,0,1,24,'T');rect(g,35,0,1,24,'T');
+ rect(g,20,11,11,7,'z');rect(g,22,12,7,5,'w');
+ [[3,9],[33,9],[3,21],[33,21],[19,20],[8,20]].forEach(([x,y])=>rect(g,x,y,1,1,'P'));
+ const W=gridWorld(g,61);
+ building(W,3,1,30,6,{wall:'#f0d9c4',roof:'#a05a7a',rh:1.4,sign:'PINE PALM MOTEL',sw:300,sbg:'#4a2a5a',sfg:'#ff7ab0',sfs:26});
+ for(let k=0;k<8;k++){const x=5+k*3;doorSign(W,x,6.4,k+1);const c=W.g,X=x*TS;c.fillStyle='#bfe8ff';c.fillRect(X-30,4*TS+8,22,26);c.fillStyle='rgba(255,255,255,.5)';c.fillRect(X-26,4*TS+12,6,18)}
+ [[7,16,'#d6283b'],[13,18,'#2b86c9'],[5,19,'#f4f4f4'],[26,21,'#ffb02a']].forEach(([x,y,c])=>prop(W,'car',x,y,c));
+ icon(W,6,9,'🧊','#7a8ea0');icon(W,25,9,'🥤','#c93f4c');post(W,16,13,'ROOMS $79','#e8dcc0','#2a1a0a');post(W,31,19,'PINE PALM','#4a2a5a','#ff7ab0');
+ return{main:W}}
+const L6={id:6,n:'Pine Palm Motel',p:'Roadside motel',d:['allusion'],dev:['allusion'],tier:4,live:true,
+ title:['Thursday, 3:02 AM','Pine Palm Motel'],
+ call:[{t:"Rookie. Final case, and the hardest. A guest at the Pine Palm Motel got a very odd surprise in Room 3.",ch:["What kind of surprise?","I need coffee first."]},
+  {t:"Let's just say the guest was not the first one in the bed."},
+  {t:"And rookie, you'll know this guest. Two point four metres, a tag on his tail, and a taste for comfy beds. Yes, it's Gus. He's done it again."},
+  {t:"I want an allusion. That's a sly reference to something famous, like a fairy tale or a film."},
+  {t:"Don't expect me to hand it to you. The clue is hiding in what people say. Read it closely."},
+  {t:"And careful. Not every reference is the right one. Somebody always adds a bit more than they saw."},
+  {t:"One more thing. The motel's night guard, Walt, has orders to throw out any press snooping around a scene like this. If he spots you, you're out, and you start again from the beginning."},
+  {t:"So stay out of his sight line. Watch which way he's facing, and use the cars and palm trees for cover."},
+  {t:"Same alligator, same two-point-four metres of trouble, different bed. This is the last case, so show me how far you've come. Get me facts, then get me a reference readers will catch. Mags out."}],
+ reply:["One with teeth. Go and look.","Coffee's on the way. So are the facts."],
+ filecall:"Okay rookie. An allusion, a reference to something famous. It has to come from a fact someone really said. Don't use the extras that only came from a guess.",
+ clues:{
+  F1:{src:'Tina Ruiz, manager. She opened Room 3 herself.',t:'fact',txt:'Gus, a 2.4 m alligator from Gator Gulch Zoo, was found asleep in Room 3 of the Pine Palm Motel on Thursday.',tiles:['Gus','Alligator','Gator','Room 3','Pine Palm Motel','Zoo Escapee']},
+  F2:{src:'Rosa, housekeeper. She saw the beds.',t:'fact',txt:'It had tried three beds before settling in the smallest.',tiles:['Three Beds','Smallest Bed','Tries']},
+  F3:{src:'Tina Ruiz, manager. These are her words.',t:'fact',txt:"Manager Tina Ruiz said the scene was 'just like Goldilocks', the fairy tale about a girl who tries three beds.",tiles:['Goldilocks|a','Fairy Tale','Manager']},
+  F4:{src:'Mr. Vance, a guest. He peeked through the window.',t:'fact',txt:"A guest said the gator slept so peacefully, 'it was Sleeping Beauty all over again'.",tiles:['Sleeping Beauty|a','Peacefully']},
+  F5:{src:'Officer Reyes, wildlife officer.',t:'fact',txt:'Wildlife officers carried the gator out at dawn and returned him to Gator Gulch Zoo.',tiles:['Officers','Dawn','Removed','Back Home']},
+  R1:{src:'Pearl, a guest. She was in another building.',t:'rumour',txt:"A guest swears the gator 'ate the porridge' too.",tiles:['Porridge|a','Greedy']},
+  R2:{src:'Bo, bellhop. He is guessing.',t:'rumour',txt:"A bellhop says there were 'six gators' in the building.",tiles:['Six Gators','Invasion']},
+  J1:{src:'The sign by the lobby.',t:'junk',txt:'Rooms cost $79 a night.',tiles:['$79|n','Rooms']},
+  J2:{src:'The sign by the road.',t:'junk',txt:'The motel sign has been broken since 2019.',tiles:['Broken','Sign']}},
+ npcs:[
+  NPC('tina','Tina Ruiz',17.5,19.5,'d',NS('#c98e62','#2a1a14','#a05a7a','#2a2a3a','badge'),
+   ["Tina Ruiz, manager. Welcome to the Pine Palm. Yes, THAT motel.","Walt, the night guard, has orders to throw out any press. If he spots you, you're out and you start the case again. Stay out of his yellow vision cone. Use the cars and palm trees for cover. Cars reverse out of their bays, too, and the pool splash is slippery.",{clue:'F1'},"The tag on his tail says GUS, Gator Gulch Zoo. Two point four metres of him. Same gator who was all over the news on Tuesday.","I've seen a lot of things in this job. I haven't seen that.",{clue:'F3'},"Rosa cleans the rooms. Mr. Vance is by the pool."],["Rosa's near the rooms. Mr. Vance is by the pool."],['F1','F3']),
+  NPC('rosa','Rosa',9,8.6,'u',NS('#9a6540','#1e1410','#1de9d2','#2a2a3a','apron'),
+   ["Rosa, housekeeping. Room 3, six in the morning, and I almost screamed.",{clue:'F2'},"Biggest bed was untouched. The middle one too. The little one? Mmm. Perfect.","He'd dragged a pink inflatable flamingo in with him. Cuddling it like a teddy bear. I cried a little."],["The smallest bed. Perfect."],['F2']),
+  NPC('vance','Mr. Vance',19,14,'r',NS('#e8b098','#c9c9d8','#6b8cff','#3a3a3a','shades'),
+   ["Vance. Retired. I was up early and looked through the window.",{clue:'F4'},"Asleep like a baby. A very scaly baby."],["Sleeping Beauty, I swear."],['F4']),
+  NPC('reyes','Officer Reyes',13.5,9.4,'d',NS('#c98e62','#2a1a14','#4a8a3a','#2a2a4a','badge',{hat:'#4a8a3a'}),
+   ["Reyes, wildlife. We got the call at dawn and carried him out.",{clue:'F5'},"A very polite alligator, all things considered."],["Carried him out at dawn."],['F5']),
+  NPC('pearl','Pearl',22,20.6,'l',NS('#f6d0b0','#c4382c','#ff8a3d','#5a3a7a','glasses'),
+   ["Pearl, guest in Room 9. I was in another building, but I heard everything.",{clue:'R1'},"It ate the porridge. I'd bet my teeth on it."],["Porridge. Definitely."],['R1']),
+  NPC('bo','Bo',26.5,9,'d',NS('#8d5a3c','#1a1210','#c93f4c','#2a2a3a','none',{hat:'#c93f4c'}),
+   ["Bo, bellhop. Don't tell the boss, but I wasn't there. But I know it was loads.",{clue:'R2'},"Six gators, easy. Maybe seven."],["Six gators. Seven maybe."],['R2'])],
+ spots:[
+  SPOT('door3','Room 3',11.5,7.8,["Room 3. Police tape across the door. Muddy footprints lead out to the car park."]),
+  SPOT('rooms','Rooms sign',16.5,13.9,["A sign.",{clue:'J1'}],["Seventy-nine dollars. A bargain."],['J1']),
+  SPOT('neon','Neon sign',31.5,19.9,["The neon sign by the road. Half the letters are dark.",{clue:'J2'}],["Broken since 2019."],['J2']),
+  SPOT('ice','Ice machine',6.5,9.9,["The ice machine. It hums. There's a scale in the ice. A big one."]),
+  SPOT('vend','Vending machine',25.5,9.9,["A vending machine. Everything inside is out of date."]),
+  SPOT('pool','Pool',25,17.8,["The motel pool. There's a pair of small claw marks on the diving board."])],
+ caps:[{x:17.5,y:21,w:4,h:2,t:"Pine Palm Motel. Neon, asphalt and one very unexpected guest."}],doors:[],start:{zone:'main',x:17.5,y:21.6,dir:'u'},build:buildMotel,slickCol:'water',
+ slicks:[[19.5,10.6,'main'],[31.5,12,'main'],[19,17.5,'main'],[25,18.9,'main'],[11,9.8,'main']],
+ rogues:[],haz:[
+  {type:'rail',k:'car',col:'#2b86c9',w:[[4,13.5],[14,13.5]],sp:2.0,pause:2.2,box:[1.6,.8],msg:'Car reversing! Watch for the white reverse light and stay off the yellow lane.'},
+  {type:'rail',k:'car',col:'#ffb02a',w:[[32,20.5],[22,20.5]],sp:2.0,pause:2.6,box:[1.6,.8]},
+  {type:'guard',w:[[4,11.2],[16,11.2],[16,15.5],[4,15.5]],sp:1.3,pause:1.6,len:5.4,half:.45,msg:'Security guard Walt! Stay out of his yellow vision cone. Hide behind cars and trees.'}],
+ warn:'Out of control! It will charge you. Step aside.',ko:KO+" and a note fell out. Ask again."};
+const LV=[L1,L2,L3,L4,L5,L6];
+const CASES=LV;
+/* scenery pass: more props, odd locals and funny finds. 'odd' things never count toward the leads meter. */
+function emoSol(W,x,y,e,sz){sol(W,x,y);const g=W.g,X=x*TS,Y=y*TS;shadow(g,X+16,Y+29,11,4,.25);g.font=(sz||28)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#000';g.fillText(e,X+16,Y+14)}
+function emoGround(W,x,y,e,sz){const g=W.g,X=x*TS,Y=y*TS;g.globalAlpha=.9;g.font=(sz||20)+'px "Apple Color Emoji","Segoe UI Emoji",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#000';g.fillText(e,X+16,Y+16);g.globalAlpha=1}
+function decorate(W,list){for(const d of list){const k=d[0],x=d[1],y=d[2];
+ if(OBJ[k])OBJ[k](W,x,y);else if(k==='e')emoSol(W,x,y,d[3],d[4]);else if(k==='g')emoGround(W,x,y,d[3],d[4]);
+ else if(k==='i')icon(W,x,y,d[3],d[4]);else if(k==='post')post(W,x,y,d[3],d[4],d[5]);else prop(W,k,x,y,d[3])}}
+const ON=(id,name,x,y,dir,st,lines,again,more)=>NPC(id,name,x,y,dir,st,lines,again,lines.filter(l=>typeof l!=='string').map(l=>l.clue),{odd:true,...more});
+const OS=(id,name,tx,ty,ic,lines,again)=>({id,name,tx,ty,ic,lines,again,clues:[]});
+function extend(L,ex){
+ L.npcs=[...L.npcs,...ex.npcs.map(n=>({...n,odd:true}))];
+ L.spots=[...L.spots,...ex.spots.map(s=>({...s,odd:true,x:s.tx+.5,y:s.ty+.8,zone:ex.zone}))];
+ Object.assign(L.clues,ex.clues||{});
+ const ob=L.build;L.build=()=>{const z=ob(),W=z[ex.zone||Object.keys(z)[0]];decorate(W,ex.deco);ex.spots.forEach(s=>{if(s.ic)icon(W,s.tx,s.ty,s.ic[0],s.ic[1])});return z}}
+const KID=(skin,hair,shirt,pants,more)=>NS(skin,hair,shirt,pants,'none',{kid:true,...more});
+
+/* ===== level 1: Gator Gulch Zoo ===== */
+extend(L1,{zone:'zoo',
+ deco:[['P',4,27],['P',8,26],['T',13,27],['T',26,27],['P',32,27],['P',36,26],['flower',23,26,[2,1]],['bench',29,26],['picnic',19,5],['R',24,8],['R',16,10],['L',10,2],['L',20,2],['L',30,2],['B',15,3],
+  ['e',6,3,'🦆'],['e',28,3,'🍦'],['g',20,25,'🪶',18],['g',22,21,'🪶',18],['g',27,20,'🍦',18],['g',12,22,'🦶',20],['g',13,23,'🦶',20]],
+ clues:{
+  X1:{src:'Poppy, trainee keeper. She was hiding from a goose at the time.',t:'rumour',txt:'Poppy says Gus can open doors with his tail.',tiles:['Door-Opener']},
+  X2:{src:'Dwayne, a tourist. He is reviewing the hot dogs.',t:'junk',txt:"Dwayne says the zoo's hot dogs are 'the best in the world'.",tiles:['Hot Dogs']}},
+ npcs:[
+  ON('poppy','Poppy',3.5,3.3,'r',NS('#e8b088','#c4382c','#2a8a4a','#2a2a3a','badge'),["Shh! Poppy. Trainee keeper. There's a goose behind that bin and it knows my name.","Nobody told me about the goose in the job ad.",{clue:'X1'},"If you see the goose, I was never here."],["Is it gone? Is it gone?"]),
+  ON('dwayne','Dwayne',24.5,4.9,'l',NS('#f6d0b0','#9a5a22','#ff8a3d','#3a7ac8','shades',{hat:'#fff7e0'}),["Dwayne, Ohio. Sunburnt in the shape of my own camera strap.","Four hot dogs so far. Five is a lifestyle.",{clue:'X2'}],["Do not tell my wife about the fourth hot dog."]),
+  ON('garry','Garry',33.5,2.8,'d',NS('#c98e62','#1e1410','#2a8a4a','#2a8a4a','none',{hat:'#2a8a4a'}),["Garry. I'm the gator mascot. This is the head, I'm taking five minutes.","It is a hundred degrees in there. The tail is also very heavy.","If anyone asks, I'm 'between costumes'."],["Five minutes. Please."]),
+  ON('ruth','Old Ruth',3,13.5,'r',NS('#f0c8a0','#d8d8e0','#c4382c','#3a3a4a','glasses',{glass:'#2a6bd8'}),["Ruth. I'm here every Tuesday to feed the pigeons.","They do not need feeding. They look like small turkeys. I regret nothing."],["Pigeon, pigeon, pigeon."],{wander:[[3,13.5],[9,13.5]]}),
+  ON('mateo','Mateo',35.5,25.5,'l',KID('#c98e62','#1e1410','#ffd23f','#2a6bd8',{ht:'cap',hat:'#c4382c'}),["I'm Mateo. I'm eight. I've counted 61 lizards but my mum says one was a leaf.","It moved. It was a lizard."],["Sixty-one!"])],
+ spots:[
+  OS('map','Zoo map',19,3,['🗺️','#6b4a2a'],["A big zoo map. A red arrow says YOU ARE HERE. It points at the car park. You are not in the car park."],["Still pointing at the car park."]),
+  OS('bucket','Fish bucket',9,2,['🪣','#4a5a6a'],["A bucket of fish, labelled SNACKS. Someone has stuck on a second label: NOT YOURS."],["Not yours."]),
+  OS('ticket','Ticket sign',31,25,['🎟️','#8a5a30'],["A sign: FREE ENTRY FOR ANYONE NAMED GUS. Under it, in marker: please stop."],["Everyone here is called Gus today."]),
+  OS('gnome','Garden gnome',21,26,['🧙','#5a7a3a'],["A garden gnome in sunglasses and a tiny hi-vis vest. He looks like he's guarding the exit. He is not."],["Great hat."])]});
+
+/* ===== level 2: Swamp Mart ===== */
+extend(L2,{
+ deco:[['i',11,3,'🍎','#8a5a30'],['i',13,3,'🥬','#8a5a30'],['i',15,3,'🍉','#8a5a30'],['i',17,3,'🍌','#8a5a30'],['i',19,3,'🥕','#8a5a30'],['e',7,3,'🎄'],['e',2,19,'🧺'],['e',24,6,'🪴'],['e',2,22,'🎈'],['e',31,22,'🎈'],['e',33,22,'🎈'],['e',1,8,'🪴'],
+  ['g',18,20,'🪶',16],['g',20,18,'🪶',16],['g',23,19,'🪶',16],['g',26,21,'🪶',16],['g',30,20,'🪶',16],['g',16,11,'🍌',18],['g',22,22,'🧃',16]],
+ clues:{
+  X1:{src:'Gerald, an insomniac shopper. He was in his slippers.',t:'junk',txt:'Gerald says the pelican was wearing a tiny top hat.',tiles:['Top-Hat']},
+  X2:{src:'Kelvin, the shop DJ. It is a theory.',t:'rumour',txt:'Kelvin says the pelican was lured in by the in-store music.',tiles:['Music','Lured']}},
+ npcs:[
+  ON('gerald','Gerald',11.5,5.6,'r',NS('#f0c8a0','#8a8a9a','#6b8cff','#3a7ac8','glasses',{glass:'#444'}),["Gerald. Retired. I come at 5 AM because the jam aisle is peaceful.","I bought forty jars of pickles. Don't ask. Actually, do ask. No. Don't.",{clue:'X1'}],["Pickles. Forty of them."],{wander:[[11.5,5.6],[20.5,5.6]]}),
+  ON('theo','Theo',1.8,18.4,'r',KID('#e8b088','#4a2e1c','#a6ff5c','#2a2a4a',{}),["Zzz... no, Mum, the pelican said it's fine... zzz.","He is fast asleep standing up in his dinosaur pyjamas. Nobody knows whose child he is."],["Zzz..."]),
+  ON('pierre','Pierre',29.5,19.6,'d',NS('#f6d0b0','#1a1210','#f4f4f4','#1a1a2a','none',{hat:'#1a1a2a'}),["Pierre is a mime. He is trapped in an invisible box. He mimes: 'I saw everything.'","He mimes a bird. He flaps. He mimes a very small, very sad chicken.","You ask a follow-up. He pretends the wall is glass. You leave it there."],["He is still in the box."]),
+  ON('kelvin','Kelvin',24.5,22.4,'r',NS('#8d5a3c','#1a1210','#c93f4c','#2a2a3a','shades',{hat:'#1a1a2a'}),["Kelvin. Night-shift DJ. The shop plays one song on a loop: 'Wind Beneath My Wings'.","I've heard it 400 times. It's actually kind of a banger now.",{clue:'X2'}],["Four hundred and one."],{wander:[[24.5,22.4],[31.5,22.4]]})],
+ spots:[
+  OS('chef','Cardboard chef',21,5,['🧑‍🍳','#8a5a30'],["A life-size cardboard cut-out of a celebrity chef. Someone has drawn a pelican on his shoulder. It looks great."],["The chef approves."]),
+  OS('lotto','Lottery machine',3,21,['🎰','#3a3a4a'],["A lottery machine. It says: 'YOU HAVE ALREADY WON'. It does not say what."],["Still won."]),
+  OS('samples','Free samples',27,21,['🧀','#8a5a30'],["A tray of free cheese samples. One cube. A pelican feather is stuck in it like a flag."],["Planted. Claimed."]),
+  OS('fish','Lobster tank',33,5,['🦞','#2a6aaa'],["A lobster tank. The lobsters have formed a line against the glass. They look like they're watching the doors."],["They're still watching."])]});
+
+/* ===== level 3: Dead Duck Marina ===== */
+extend(L3,{
+ deco:[['e',6,2,'⚓'],['e',19,2,'🦀'],['e',29,2,'🎣'],['X',1,13],['X',2,13],['O',33,13],['O',34,13],['O',33,14],['L',5,10],['L',14,10],['L',22,10],['L',31,10],['e',31,17,'🛶'],['e',33,19,'🛶'],['P',1,21],['P',34,22],['T',20,22],
+  ['g',8,12,'🐟',18],['g',25,14,'🐚',18],['g',31,15,'🐚',18],['g',12,19,'🦀',18],['g',22,19,'🧶',18]],
+ clues:{
+  X1:{src:"Captain Barnacle's parrot, Pete. Not an official witness.",t:'junk',txt:"Pete the parrot squawked 'THE DUCK DID IT'.",tiles:['Parrot']},
+  X2:{src:'Lenny, age 9. He has not seen anything. He has a theory.',t:'rumour',txt:'Lenny says the duck was pushed by a mermaid.',tiles:['Mermaid']}},
+ npcs:[
+  ON('fred','Old Fred',22.5,13.5,'d',NS('#e8b088','#d8d8d8','#2a6bd8','#6a5a3a','none',{hat:'#fff7e0'}),["Fred. Haven't caught anything since 1994. The fish know me.","My secret? A sandwich on the hook. The fish don't care. I do."],["Still no bites."]),
+  ON('nadia','Nadia',18.5,8.3,'u',NS('#c98e62','#1a1210','#ff3d8b','#2a6bd8','shades'),["Nadia, on holiday. 340 selfies of the same boat. Look, THIS one has more sparkle.","Can you stand over there and pretend to be a mysterious fisherman?"],["Chin up! Sparkle!"]),
+  ON('barnacle','Capt. Barnacle',2,17.6,'d',NS('#d9a67e','#e8e8f0','#c4382c','#1a2a4a','none',{hat:'#1a2a4a'}),["Captain Barnacle. This is Pete, my parrot. Say hello, Pete.","Pete says the duck did it. Pete says that about everything.",{clue:'X1'}],["Pete says hello."],{wander:[[2,17.6],[2,20.4]]}),
+  ON('lenny','Lenny',33.5,18.4,'l',KID('#f6d0b0','#c4382c','#ffd23f','#2a6bd8',{}),["I'm Lenny. I'm fishing with spaghetti. It works. Nothing yet but it's early.","My theory: it was a mermaid. She pushed the duck. Mermaids are jealous.",{clue:'X2'}],["The mermaid did it."])],
+ spots:[
+  OS('menu','Specials board',21,17,['🍤','#6b4a2a'],["CATCH OF THE DAY: WHATEVER. CATCH OF YESTERDAY: ALSO WHATEVER. Someone has added: ASK ABOUT THE DUCK."],["Whatever."]),
+  OS('net','Tangled net',32,21,['🥅','#4a5a6a'],["A tangled net. Something in it is still wriggling. You decide it is not your business."],["It's still wriggling."]),
+  OS('trophy','Weigh-in trophy',6,13,['🏆','#8a6a2a'],["The Biggest Fish trophy, 1987. The plaque says FISH. Nothing else. The fish was reportedly very big."],["Biggest. Fish."]),
+  OS('cooler','Ice cooler',24,13,['🧊','#4a8aaa'],["A cooler marked DO NOT OPEN, DUCK STUFF. You do not open it. Responsible journalism."],["Do not open."])]});
+
+/* ===== level 4: Palmetto Trailer Park ===== */
+extend(L4,{
+ deco:[['e',9,2,'🦩'],['e',11,2,'🦩'],['P',2,1],['P',34,1],['P',31,3],['P',33,5],['P',30,9],['P',33,9],['e',33,11,'🛟'],['e',24,12,'📡'],['e',32,15,'🗿'],['e',1,12,'🚲'],['B',16,21],['L',6,20],['L',28,20],['L',3,10],['L',14,8],
+  ['g',14,3,'🍕',18],['g',20,22,'🧦',18],['g',26,2,'🦴',18],['g',5,13,'🐾',18],['g',22,9,'🐾',18]],
+ clues:{
+  X1:{src:'Vince, a van salesman. He is selling something.',t:'junk',txt:'Vince says the whole park is haunted.',tiles:['Haunted']},
+  X2:{src:'Mabel, with three chickens. They were not looking.',t:'rumour',txt:"Mabel says the chickens 'saw it all' and won't talk.",tiles:['Chicken Witnesses']}},
+ npcs:[
+  ON('dot','Miss Dot',33.5,6.8,'l',NS('#f0c8a0','#d8d8e0','#ff7ab0','#6a4a8a','glasses',{glass:'#444'}),["Dot. Forty years in Lot 9. Everybody here is either a saint or on the run, and I'm not saying which.","I water the plastic flowers. They've never looked better."],["Plastic flowers. Very low maintenance."]),
+  ON('tank','Tank',31.5,10.8,'d',NS('#c98e62','#1a1210','#1a1a2a','#3a3a4a','shades'),["Tank. This is Beefcake, my chihuahua. He's the smaller of us. He's also the meaner.","Beefcake once chased a bin lorry for two miles. I carried him the last half."],["Beefcake says no comment."]),
+  ON('mabel','Mabel',14,10.5,'r',NS('#e8b098','#9a9aa0','#ffd23f','#2a6bd8','none',{hat:'#c4382c'}),["Mabel. These are my girls. Beyonce, Gaga and Susan. Susan's the difficult one.","They were out the whole night. They know things. They won't say.",{clue:'X2'}],["Cluck."],{wander:[[14,10.5],[18,10.5]]}),
+  ON('vince','Vince',32.5,21.5,'u',NS('#f6d0b0','#4a2e1c','#2a8a4a','#2a2a3a','badge'),["Vince. I sell genuine moon rocks out of this van. Found it in my yard. The moon is basically right there.","Between us, this park is haunted. Ghost in lot 14. Very rude. Takes my parking spot.",{clue:'X1'}],["Moon rocks, $5."])],
+ spots:[
+  OS('mail','Mailbox',3,8,['📬','#6b4a2a'],["A mailbox stuffed with 200 unopened letters. The flag is up. It has been up since spring."],["The flag is still up."]),
+  OS('bbq','Barbecue',32,12,['🍖','#5a3a2a'],["A grill with one sausage on it, cooked to a crisp. It looks like it is waiting for someone. Probably a dog."],["Just the one sausage."]),
+  OS('lawn','Lawn flamingos',10,3,['🦩','#5a7a3a'],["Seven plastic lawn flamingos in a line. They face the trailers. They look like a jury."],["The jury is out."]),
+  OS('dish','Satellite dish',24,12,['📡','#4a5a6a'],["A satellite dish aimed at the neighbour's trailer. Someone has duct-taped the word WIFI to it."],["Wifi."])]});
+
+/* ===== level 5: Putt-Putt Palace ===== */
+extend(L5,{
+ deco:[['T',3,1],['P',6,1],['T',9,1],['P',12,1],['T',15,1],['P',19,1],['T',25,1],['P',28,1],['T',31,1],['P',34,1],['T',5,22],['P',9,22],['T',13,22],['T',23,22],['P',27,22],['T',31,22],['flower',6,20,[3,1]],['bench',27,9],['e',29,2,'🦖'],['e',33,19,'⛲'],['e',3,16,'🦩'],['L',4,2],['L',33,3],
+  ['g',4,19,'⛳',22],['g',10,3,'⛳',22],['g',31,13,'⛳',22],['g',22,19,'🍦',18],['g',15,15,'🪙',16]],
+ clues:{
+  X1:{src:'Clancy, a birthday clown. He is lost and upset.',t:'junk',txt:'Clancy says clowns have been banned from the course.',tiles:['Clown Ban']},
+  X2:{src:'Duke, a regular. He is guessing.',t:'rumour',txt:"Duke says the windmill 'has never been fixed in forty years'.",tiles:['Never Fixed']}},
+ npcs:[
+  ON('birdie','Birdie',32.5,17.2,'l',KID('#e8b088','#4a2e1c','#ff3d8b','#2a6bd8',{hat:'#ffd23f'}),["It's my birthday! I'm nine! I got a tiara. I'm the queen of mini-golf.","The clown didn't come but the windmill did. I'm calling that a success."],["Happy birthday to me!"]),
+  ON('clancy','Clancy',6.5,14.7,'r',NS('#f6d0b0','#ff7a3a','#ff3d8b','#2a6bd8','none',{hat:'#ffd23f'}),["Clancy. Birthday clown. I was booked for this party. I got lost.","I mistook the windmill for a very slow carousel. I've been standing here an hour.",{clue:'X1'}],["Is it still the party?"]),
+  ON('duke','Duke',26,20.5,'r',NS('#d9a67e','#e8e8e8','#2a8a4a','#f4f4f4','none',{hat:'#f4f4f4'}),["Duke. Thirty years on this course. I still can't get the windmill. My record is a fourteen.",{clue:'X2'},"I tell everybody it's the wind."],["Fourteen strokes. A new low."],{wander:[[26,20.5],[33,20.5]]}),
+  ON('marge','Marge',31.5,3.7,'d',NS('#e8b098','#d8d8e0','#ff8a3d','#2a2a3a','apron',{hat:'#f4f4f4'}),["Marge, snack bar. Hot dogs, slushies, and a sign that says 'We Know What We Did'.","Don't ask about hole 13."],["Hole 13. No."])],
+ spots:[
+  OS('dino','Dino statue',29,2,['🦖','#5a7a3a'],["A giant dinosaur with a putter stuck in its mouth. A sign reads: PLEASE DO NOT FEED THE DINOSAUR. Somebody has fed it."],["Still hungry."]),
+  OS('balls','Lost ball bin',13,21,['⛳','#4a5a6a'],["A bin of lost balls. There are 1,203 in there. One is gold. You are pretty sure it's just yellow."],["Mostly yellow."]),
+  OS('score','Scoreboard',5,8,['📊','#4a3a6a'],["The scoreboard. Every single score is a 14. The pencil is chained to the board."],["Fourteen. Fourteen. Fourteen."]),
+  OS('well','Wishing pond',33,19,['⛲','#4a8aaa'],["A pond full of coins. 4,000 of them. Mostly pennies. One watch. One single tiara."],["Make a wish."])]});
+
+/* ===== level 6: Pine Palm Motel ===== */
+extend(L6,{
+ deco:[['P',5,7],['P',15,7],['P',26,7],['P',32,7],['P',2,10],['flower',24,22,[3,1]],['e',2,19,'🛵'],['e',33,19,'🗑️'],['post',30,8,'NO VACANCY','#2a1a3a','#ff4060'],['L',10,9],['L',21,12],['B',31,17],['T',34,10],
+  ['g',24,18,'🍟',16],['g',10,22,'🧦',18],['g',17,20,'🧂',18],['g',28,11,'🍕',16],['g',18,7,'🦎',18]],
+ clues:{
+  X1:{src:"Earl, Room 4. He's had a long night.",t:'junk',txt:'Earl says the motel ice machine groans at midnight.',tiles:['Haunted Ice']},
+  X2:{src:'Kimmy, a teen. She is streaming.',t:'rumour',txt:"Kimmy says her stream 'definitely caught something weird'.",tiles:['Caught on Camera']}},
+ npcs:[
+  ON('earl','Earl',23.5,9.8,'l',NS('#e8b098','#9a9a9a','#8a6aa0','#8a6aa0','none'),["Earl. Room 4. Eleven years. Came for the weekend.","This is Doris. She's a ferret. She pays half the rent.",{clue:'X1'}],["Doris says hello."]),
+  ON('kimmy','Kimmy',2.5,18.4,'r',NS('#c98e62','#4a2e1c','#ff3d8b','#2a2a3a','visor'),["Kimmy. I'm streaming. 'Day 3 at the motel where something happened.' Seven viewers. Six are my nan.",{clue:'X2'},"Subscribe. Please. For Nan."],["Smash that like button for Nan."]),
+  ON('dale','Dale',27.5,10.8,'r',NS('#f6d0b0','#6a4a2a','#2a2a4a','#2a2a4a','none',{hat:'#1a1a2a'}),["Dale. Mop salesman. The Miracle Mop. It does the floor, the ceiling and your feelings.","Buy two and I'll throw in a third, still in the box. Don't ask where it was."],["Miracle Mop. Still available."],{wander:[[27.5,10.8],[33,10.8]]}),
+  ON('alvarez','Mrs Alvarez',10.5,21.2,'u',NS('#c98e62','#2a1a14','#4a8a8a','#2a2a3a','apron'),["Mrs Alvarez. Night cleaner. Forty rooms a night. I know everything. I say nothing. But I do hum.","I hum louder when somebody is lying."],["Hmm hmm hmm."])],
+ spots:[
+  OS('vend','Vending machine',33,13,['🥤','#4a4a6a'],["A vending machine with one item left: a single hard-boiled egg. It costs $9. Somebody has tried to buy it recently."],["It's still $9."]),
+  OS('ice','Ice machine',33,15,['🧊','#4a8aaa'],["The ice machine clunks every few seconds. Inside the bin there's a flip-flop, a few scraps of pink plush stuffing, and a note that says 'SORRY'."],["Clunk."]),
+  OS('duck','Pool duck',29,22,['🦆','#4a8aaa'],["An empty pool with one rubber duck at the bottom. A sign says POOL CLOSED SINCE 2009."],["The duck is on duty."]),
+  OS('tv','Room 3 window',18,8,['📺','#3a3a4a'],["Through the window, a TV plays a cooking show to an empty room. Somebody is winning. Nobody is watching."],["Somebody's winning."])]});
+/* keypad: on-screen letters, so the iPad keyboard never appears */
+function kp(o){
+ let v=o.value||'';
+ const rows=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+ const k=l=>`<button data-k="${l}">${l}</button>`;
+ openM(`<span class="call">${esc(o.title)}</span><div class="kd" id="kd"></div><div class="kp">${rows.map(r=>'<div>'+[...r].map(k).join('')+'</div>').join('')}<div>${k('-')}${k("'")}${o.space?'<button class="w" data-k=" ">Space</button>':''}<button class="w" data-k="<">Delete</button></div></div><div class="row"><button class="btn ghost" id="kc">Cancel</button><button class="btn teal" id="kdn">Done</button></div>`);
+ const fmt=s=>s.replace(/(^|[ \-'])([a-z])/g,(m,a,b)=>a+b.toUpperCase());
+ const paint=()=>{$('kd').textContent=v||o.hint||'';$('kd').style.opacity=v?1:.45};paint();
+ $('sheet').onclick=e=>{const b=e.target.closest('button[data-k]');if(!b)return;const key=b.dataset.k;
+  if(key==='<')v=v.slice(0,-1);else if(v.length<(o.max||14))v=fmt(v+key.toLowerCase());paint()};
+ $('kc').onclick=()=>{$('sheet').onclick=null;closeM()};
+ $('kdn').onclick=()=>{$('sheet').onclick=null;closeM();o.cb(v.trim())};
+}
+/* setup */
+function renderSetup(){
+ $('f-real').textContent=S.real||'Tap to type your name';$('f-real').classList.toggle('empty',!S.real);
+ [0,1].forEach(i=>$('sp'+i).textContent=NM[i][S.nm[i]]);$('jn').textContent=jname();
+ $('s-go').disabled=S.real.length<2;
+ [['sw0',SKIN,0],['sw1',HAIR,1],['sw2',SHIRT,2]].forEach(([id,arr,k])=>{$(id).innerHTML=arr.map((c,i)=>`<button data-sw="${k},${i}" class="${S.av[k]===i?'on':''}" style="background:${c}" aria-label="Colour ${i+1}"></button>`).join('')});
+ [3,4].forEach(i=>$('lk'+i).textContent=(i===3?HS:HD)[S.av[i]]);
+ drawBust($('pv'),PLAYER());
+}
+$('f-real').onclick=()=>kp({title:'Your real name (teacher only)',value:S.real,max:22,space:true,hint:'Type here',cb:v=>{S.real=v;renderSetup()}});
+document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const[i,d]=b.dataset.sp.split(',').map(Number);S.nm[i]=(S.nm[i]+d+NM[i].length)%NM[i].length;renderSetup()});
+$('s-rand').onclick=()=>{S.nm=NM.map(a=>Math.floor(Math.random()*a.length));renderSetup()};
+$('setup').addEventListener('click',e=>{const b=e.target.closest('[data-sw]');if(!b)return;const[k,i]=b.dataset.sw.split(',').map(Number);S.av[k]=i;renderSetup()});
+document.querySelectorAll('[data-lk]').forEach(b=>b.onclick=()=>{const[i,d]=b.dataset.lk.split(',').map(Number),n=(i===3?HS:HD).length;S.av[i]=(S.av[i]+d+n)%n;renderSetup()});
+$('r-gentle').onclick=()=>{S.gentle=!S.gentle;$('r-gentle').textContent='Hazards: '+(S.gentle?'Gentle':'Normal')};
+$('s-go').onclick=()=>show('rules');
+$('t-go').onclick=()=>{renderSetup();show('setup')};
+$('r-go').onclick=()=>{renderCases();show('cases')};
+$('r-back').onclick=()=>show('setup');
+/* cases: sequential */
+const total=()=>Object.values(S.done).reduce((a,d)=>a+d.pts,0)+(S.bonus||0);
+function renderCases(){
+ const n=Object.keys(S.done).length;
+ $('lv-top').innerHTML=`<div><span class="lab">Reporter</span><b style="font-size:20px">${esc(jname())}</b></div><div><span class="lab">Score</span><b style="font-size:20px">${total()}</b></div>`;
+ $('l-front').textContent='Front page ('+n+'/'+CASES.length+')';$('l-front').disabled=!n;
+ $('lgrid').innerHTML=CASES.map((l,i)=>{const d=S.done[i],open=true;
+  const st=d?'done':(open&&l.live?'':'lock');
+  return `<button class="lc ${st}" ${st==='lock'?'disabled':`data-lv="${i}"`}><span class="stars">${'★'.repeat(l.tier)}${'☆'.repeat(4-l.tier)}</span><h3>${i+1}. ${esc(l.n)}</h3><span class="mute">${esc(l.p)}</span><span>${l.d.map(x=>'<span class="chip">'+DEV[x].n+'</span>').join(' ')}</span>${d?'<span class="hlx">'+esc(d.hl)+'</span>':st==='lock'?'<span class="mute">'+(open?'Coming soon':'Locked. File case '+i+' first.')+'</span>':'<span class="mute">Tap to take the call</span>'}</button>`}).join('');
+}
+$('lgrid').onclick=e=>{const b=e.target.closest('[data-lv]');if(b)callScene(+b.dataset.lv)};
+$('l-front').onclick=()=>{front();show('front')};
+$('l-back').onclick=()=>show('rules');
+function devBox(l){return l.dev.map(x=>`<div class="bubble" style="font-size:15px"><b>${DEV[x].n}</b>. ${esc(DEV[x].d)}<br><span class="mute">Example: ${esc(DEV[x].x)}</span></div>`).join('')}
+/* desk */
+const DK={n:'statistic',p:'pun',s:'slang',h:'hyperbole',a:'allusion'};
+const hltext=H=>H.reduce((s,t)=>t.pc?s+t.w:(s?s+' ':'')+t.w,'');
+function openDesk(){
+ const lv=CUR,cards=G.notes.map(id=>({k:id,c:CLUES[id]})),tiles=[];
+ cards.forEach(({k,c})=>c.tiles.forEach((t,j)=>{const[w,d]=t.split('|');tiles.push({id:k+'.'+j,w,dev:DK[d]||'',ct:c.t,ck:k})}));
+ const keep=D?D.H.filter(t=>t.glue||t.pc||t.own||tiles.some(x=>x.id===t.id)):[];
+ D={lv,cards,tiles,H:keep};
+ const hasH=lv.dev.includes('hyperbole');
+ $('desk').innerHTML=`<div class="dl scroll"><div class="panel"><span class="lab">Mags wants</span>${devBox(lv)}<p class="mute" style="margin-top:8px;font-size:13px">Build from facts you trust. Anything that was only a guess ${hasH?'can only supply the exaggeration':'cannot be printed'}. If a check fails, ask who said it and how they knew.</p></div><div class="panel"><span class="lab">Your notebook</span><div class="ev">${cards.map(x=>`<p><span class="snote" style="margin:0 0 4px">${esc(x.c.src)}</span>${esc(x.c.txt)}</p>`).join('')}</div></div></div>
+<div class="dr"><div class="hl" id="hl"></div><div class="panel chk" id="chk"></div>
+<div class="scroll" id="bank"><div class="tiles">${tiles.map((t,i)=>`<button class="tile" data-t="${i}">${esc(t.w)}</button>`).join('')}</div><span class="lab" style="margin-top:12px">Little words and punctuation</span><div class="tiles">${GLUE.map((w,i)=>`<button class="tile g" data-g="${i}">${w}</button>`).join('')}${PUNCT.map((w,i)=>`<button class="tile g" data-p="${i}">${w}</button>`).join('')}</div></div>
+<div class="acts"><button class="btn ghost sm" id="d-back">Back to map</button><button class="btn ghost sm" id="d-undo">Undo</button><button class="btn ghost sm" id="d-clear">Clear</button><button class="btn sun sm" id="d-own">+ Own word</button><button class="btn teal" id="d-send">Send to press</button></div></div>`;
+ $('bank').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.t!==undefined)D.H.push({...D.tiles[+b.dataset.t]});
+  else if(b.dataset.g!==undefined)D.H.push({id:'g'+Date.now()+Math.random(),w:GLUE[+b.dataset.g],glue:true,ct:'glue',dev:''});
+  else D.H.push({id:'p'+Date.now()+Math.random(),w:PUNCT[+b.dataset.p],pc:true,ct:'glue',dev:''});
+  refresh()};
+ $('hl').onclick=e=>{const b=e.target.closest('button');if(!b)return;D.H.splice(+b.dataset.i,1);refresh()};
+ $('d-back').onclick=()=>show('play');$('d-undo').onclick=()=>{D.H.pop();refresh()};$('d-clear').onclick=()=>{D.H=[];refresh()};
+ $('d-own').onclick=()=>kp({title:'Type your own word',max:14,hint:'One word',cb:w=>{if(w){D.H.push({id:'o'+Date.now(),w,own:true,ct:'own',dev:''});refresh()}}});
+ $('d-send').onclick=submitHL;
+ show('desk');refresh();
+}
+function allit(words){const m={};words.forEach((t,i)=>{if(t.glue)return;const c=(t.w.match(/[a-z]/i)||[''])[0].toLowerCase();if(c)(m[c]=m[c]||[]).push(i)});
+ return Object.values(m).some(a=>a.some((p,k)=>k+2<a.length&&a[k+2]-p<=4))}
+function evalHL(H,lv){
+ const words=H.filter(t=>!t.pc),hasH=lv.dev.includes('hyperbole'),checks=[];
+ const has=(dv,cts)=>H.some(t=>t.dev===dv&&cts.includes(t.ct));
+ const HINT={alliteration:'Needs 3 words starting with the same sound, close together.',statistic:'Needs a verified number from this story.',hyperbole:'Needs an exaggeration. Check what witnesses said.',slang:'Needs slang or a nickname from a verified card.',pun:'Needs a pun from a verified card.',question:'Start with a question word and end with ?',allusion:'Needs a famous reference. Look for a fairy tale.'};
+ for(const d of lv.dev){let ok=false;
+  if(d==='alliteration')ok=allit(words);
+  else if(d==='question')ok=H.length>1&&H[H.length-1].w==='?'&&QW.includes((words[0]||{w:''}).w.toLowerCase());
+  else if(d==='hyperbole')ok=has('hyperbole',['fact','rumour']);
+  else ok=has(d,['fact']);
+  let hint=HINT[d];
+  if(!ok&&d==='statistic'){if(H.some(t=>t.dev==='statistic'&&t.ct==='rumour'))hint='That number was only a rumour.';else if(H.some(t=>t.dev==='statistic'&&t.ct==='junk'))hint='That number is not part of the story.'}
+  checks.push({ok,txt:'Uses '+DEV[d].n.toLowerCase(),hint})}
+ const fact=H.filter(t=>t.ct==='fact').length;
+ checks.push({ok:fact>=2,txt:'Built on trusted facts ('+Math.min(fact,2)+'/2 tiles)',hint:'Use at least 2 tiles from facts you can trust.'});
+ const rum=H.filter(t=>t.ct==='rumour'&&!(t.dev==='hyperbole'&&hasH));
+ checks.push({ok:!rum.length,txt:'Nothing that was only a guess',hint:rum.length?rum.map(t=>t.w).join(', ')+' came from someone guessing or exaggerating.':''});
+ checks.push({ok:words.length>=3&&words.length<=12,txt:'Between 3 and 12 words',hint:words.length<3?'A bit short.':'Too long. Headlines are punchy.'});
+ return{checks,pass:checks.every(c=>c.ok),factTiles:fact};
+}
+function refresh(){
+ const lv=D.lv,r=evalHL(D.H,lv);
+ $('hl').innerHTML=D.H.length?D.H.map((t,i)=>`<button data-i="${i}">${esc(t.w)}</button>`).join(''):'<span class="ph">Tap tiles to build a headline</span>';
+ $('chk').innerHTML=r.checks.map(c=>`<div class="${c.ok?'ok':'no'}"><b>${c.ok?'✔':'○'}</b><span>${esc(c.txt)}${!c.ok&&c.hint&&D.H.length?'. '+esc(c.hint):''}</span></div>`).join('');
+ const used=new Set(D.H.map(t=>t.id));
+ document.querySelectorAll('#bank [data-t]').forEach(b=>b.classList.toggle('used',used.has(D.tiles[+b.dataset.t].id)));
+ $('d-send').disabled=!r.pass;
+}
+/* where Mags catches you when she rings. One scene per case, matched to the time of day. */
+const mono='font-family="monospace"',bang='font-family="Bangers,Impact,sans-serif"';
+const SC={
+kitchen:{when:'TUESDAY 8:01 AM',what:'Breakfast. Mid-toast.',svg:`
+ <defs><linearGradient id="k1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe8bc"/><stop offset="1" stop-color="#f4c98a"/></linearGradient></defs>
+ <rect width="800" height="450" fill="url(#k1)"/><rect y="335" width="800" height="115" fill="#b87a4a"/><rect y="335" width="800" height="8" fill="#8a5a32"/>
+ <rect x="56" y="46" width="226" height="186" rx="6" fill="#7a4a2a"/><rect x="66" y="56" width="206" height="166" fill="#8fd3ff"/><circle cx="222" cy="108" r="28" fill="#fff6a8"/><ellipse cx="120" cy="100" rx="34" ry="12" fill="#fff"/><ellipse cx="146" cy="92" rx="22" ry="10" fill="#fff"/><rect x="166" y="56" width="6" height="166" fill="#7a4a2a"/><rect x="66" y="136" width="206" height="6" fill="#7a4a2a"/>
+ <polygon points="66,222 272,222 420,450 -60,450" fill="#fff6c0" opacity=".28"/>
+ <rect x="470" y="60" width="130" height="56" rx="6" fill="#222"/><text x="535" y="102" fill="#ff5a3a" font-size="34" text-anchor="middle" ${mono}>8:01</text>
+ <rect x="670" y="40" width="120" height="300" rx="8" fill="#e8eef2"/><rect x="670" y="146" width="120" height="6" fill="#b8c4cc"/><rect x="772" y="70" width="6" height="56" rx="3" fill="#8a97a0"/><rect x="772" y="170" width="6" height="80" rx="3" fill="#8a97a0"/>
+ <rect x="690" y="64" width="24" height="24" fill="#ff3d8b"/><rect x="722" y="80" width="24" height="24" fill="#1de9d2"/><rect x="696" y="176" width="40" height="30" fill="#ffd23f"/>
+ <rect x="240" y="310" width="410" height="22" rx="4" fill="#d8924a"/><rect x="262" y="332" width="14" height="118" fill="#a8683a"/><rect x="612" y="332" width="14" height="118" fill="#a8683a"/>
+ <ellipse cx="340" cy="306" rx="56" ry="14" fill="#f4f4f4"/><ellipse cx="340" cy="302" rx="46" ry="9" fill="#fff6e0"/><g fill="#e8b04a"><circle cx="322" cy="300" r="5"/><circle cx="340" cy="298" r="5"/><circle cx="356" cy="302" r="5"/><circle cx="334" cy="306" r="4"/><circle cx="350" cy="296" r="4"/></g>
+ <rect x="436" y="294" width="46" height="16" rx="3" fill="#d89a52"/><rect x="440" y="290" width="38" height="8" rx="3" fill="#e8b878"/>
+ <rect x="540" y="276" width="36" height="34" rx="4" fill="#ff3d8b"/><path d="M576 284 q16 6 0 18" stroke="#ff3d8b" stroke-width="5" fill="none"/><path d="M552 268 q-8 -14 0 -26 M566 268 q-8 -14 0 -26" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>
+ <rect x="130" y="290" width="86" height="44" rx="6" fill="#c8ccd6"/><rect x="138" y="280" width="30" height="14" fill="#8a8f9a"/>`},
+bedroom:{when:'THURSDAY 2:58 AM',what:'Fast asleep.',svg:`
+ <rect width="800" height="450" fill="#0d0a26"/><rect y="340" width="800" height="110" fill="#1a1236"/>
+ <rect x="56" y="46" width="190" height="176" rx="6" fill="#2a2060"/><rect x="66" y="56" width="170" height="156" fill="#141a4a"/><circle cx="170" cy="112" r="28" fill="#fff6c0"/><circle cx="182" cy="104" r="26" fill="#141a4a"/><g fill="#fff"><circle cx="92" cy="84" r="2"/><circle cx="120" cy="150" r="2"/><circle cx="210" cy="190" r="2"/><circle cx="96" cy="188" r="2"/><circle cx="140" cy="76" r="1.5"/></g><rect x="148" y="56" width="5" height="156" fill="#2a2060"/><rect x="66" y="130" width="170" height="5" fill="#2a2060"/>
+ <rect x="430" y="60" width="200" height="110" fill="#2a1a4a" stroke="#4a3a7a" stroke-width="4"/><text x="530" y="125" fill="#ff3d8b" font-size="22" text-anchor="middle" ${bang}>NO SLEEP TILL PRINT</text>
+ <rect x="228" y="236" width="24" height="180" rx="4" fill="#5a3a2a"/><rect x="238" y="290" width="400" height="130" rx="14" fill="#3a4a9a"/><rect x="238" y="290" width="400" height="14" rx="6" fill="#5a6ad0"/>
+ <rect x="262" y="268" width="112" height="40" rx="18" fill="#e8e0f0"/><circle cx="322" cy="278" r="22" fill="#f0c8a0"/><path d="M300 270 q22 -22 44 0 q-4 -8 -22 -8 q-18 0 -22 8z" fill="#4a2e1c"/><path d="M312 280 q4 4 8 0 M326 280 q4 4 8 0" stroke="#1a1020" stroke-width="2" fill="none"/>
+ <rect x="360" y="300" width="270" height="110" rx="40" fill="#4a5ab0"/>
+ <text x="360" y="236" fill="#9ad4ff" font-size="34" ${bang}>Z</text><text x="392" y="206" fill="#9ad4ff" font-size="44" ${bang}>Z</text><text x="432" y="170" fill="#9ad4ff" font-size="56" ${bang}>Z</text>
+ <rect x="650" y="316" width="100" height="134" rx="4" fill="#4a2e22"/><rect x="664" y="276" width="76" height="42" rx="4" fill="#14141f"/><circle cx="702" cy="297" r="70" fill="#ff3030" opacity=".07"/><text x="702" y="306" fill="#ff3030" font-size="26" text-anchor="middle" ${mono}>2:58</text>
+ <ellipse cx="170" cy="428" rx="24" ry="9" fill="#ff7ab0"/><ellipse cx="214" cy="432" rx="24" ry="9" fill="#ff7ab0"/>`},
+movie:{when:'SUNDAY 6:21 PM',what:'Movie night. Mid-scream.',svg:`
+ <defs><linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1240"/><stop offset="1" stop-color="#1a1030"/></linearGradient><linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a5a"/><stop offset="1" stop-color="#7a3a8a"/></linearGradient></defs>
+ <rect width="800" height="450" fill="url(#m1)"/><rect y="350" width="800" height="100" fill="#120a24"/>
+ <rect x="580" y="50" width="170" height="130" rx="4" fill="#3a2a5a"/><rect x="588" y="58" width="154" height="114" fill="url(#m2)"/><rect x="662" y="58" width="5" height="114" fill="#3a2a5a"/>
+ <g transform="translate(110,14)"><polygon points="84,256 396,256 560,450 -80,450" fill="#4aa8ff" opacity=".13"/>
+ <rect x="70" y="60" width="340" height="210" rx="8" fill="#0e0e14"/><rect x="84" y="74" width="312" height="182" fill="#0a4a7a"/><g stroke="#2a7ab0" stroke-width="3" fill="none"><path d="M84 214 q30 -10 60 0 t60 0 t60 0 t60 0 t60 0"/><path d="M84 232 q30 -10 60 0 t60 0 t60 0 t60 0 t60 0"/></g>
+ <polygon points="236,214 268,150 284,214" fill="#7a8a9a"/><text x="240" y="108" fill="#ffd23f" font-size="25" text-anchor="middle" ${bang}>THE CREATURE FROM</text><text x="240" y="132" fill="#ffd23f" font-size="25" text-anchor="middle" ${bang}>THE DEEP</text>
+ <rect x="130" y="270" width="220" height="22" fill="#4a2e22"/></g>
+ <rect x="330" y="292" width="440" height="160" rx="22" fill="#8a2a4a"/><rect x="350" y="340" width="190" height="112" rx="12" fill="#a83a5a"/><rect x="556" y="340" width="190" height="112" rx="12" fill="#a83a5a"/>
+ <polygon points="584,318 644,318 636,392 592,392" fill="#d6283b"/><g fill="#fff"><polygon points="598,318 608,318 606,392 600,392"/><polygon points="620,318 630,318 626,392 620,392"/></g><g fill="#fff3c0"><circle cx="596" cy="312" r="9"/><circle cx="614" cy="306" r="10"/><circle cx="632" cy="312" r="9"/><circle cx="606" cy="298" r="8"/><circle cx="624" cy="298" r="8"/></g>`},
+car:{when:'MONDAY 8:58 AM',what:'Stuck in traffic. On speaker.',svg:`
+ <defs><linearGradient id="c1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ac0ec"/><stop offset="1" stop-color="#d8ecf8"/></linearGradient></defs>
+ <rect width="800" height="450" fill="url(#c1)"/>
+ <g fill="#8a9ab8"><rect x="40" y="130" width="60" height="90"/><rect x="110" y="100" width="50" height="120"/><rect x="170" y="150" width="70" height="70"/><rect x="560" y="120" width="60" height="100"/><rect x="630" y="90" width="50" height="130"/><rect x="690" y="140" width="80" height="80"/></g>
+ <rect y="214" width="800" height="130" fill="#6a7a68"/><polygon points="372,214 428,214 800,346 0,346" fill="#3a3a48"/>
+ <g fill="#ffd23f"><polygon points="396,222 404,222 406,236 394,236"/><polygon points="394,246 406,246 410,272 390,272"/><polygon points="390,290 410,290 418,332 382,332"/></g>
+ <rect x="344" y="228" width="64" height="36" rx="6" fill="#c4382c"/><rect x="354" y="222" width="44" height="14" rx="4" fill="#8a2a22"/><rect x="348" y="248" width="16" height="9" fill="#ff2020"/><rect x="388" y="248" width="16" height="9" fill="#ff2020"/><circle cx="356" cy="252" r="22" fill="#ff2020" opacity=".15"/><circle cx="396" cy="252" r="22" fill="#ff2020" opacity=".15"/>
+ <rect x="226" y="238" width="52" height="30" rx="5" fill="#2b86c9"/><rect x="232" y="254" width="12" height="7" fill="#ff2020"/><rect x="260" y="254" width="12" height="7" fill="#ff2020"/>
+ <rect x="636" y="120" width="8" height="100" fill="#4a4a5a"/><rect x="624" y="100" width="32" height="64" rx="6" fill="#1a1a24"/><circle cx="640" cy="116" r="9" fill="#ff3030"/><circle cx="640" cy="116" r="22" fill="#ff3030" opacity=".2"/>
+ <polygon points="0,0 80,0 0,346" fill="#14141c"/><polygon points="800,0 720,0 800,346" fill="#14141c"/>
+ <rect x="340" y="8" width="120" height="38" rx="12" fill="#1a1a24"/><rect x="348" y="14" width="104" height="24" rx="8" fill="#8ab4cc"/>
+ <path d="M0 346 q400 -26 800 0 v104 h-800z" fill="#14141c"/><ellipse cx="400" cy="480" rx="170" ry="110" fill="none" stroke="#2a2a3a" stroke-width="26"/>
+ <text x="110" y="398" fill="#39ff88" font-size="24" ${mono}>8:58</text><rect x="620" y="372" width="40" height="52" rx="6" fill="#f4efe0"/><rect x="616" y="366" width="48" height="10" rx="4" fill="#ff3d8b"/><text x="110" y="424" fill="#1de9d2" font-size="14" ${mono}>SPEAKER ON</text>`},
+bath:{when:'SATURDAY 7:12 AM',what:'Brushing teeth.',svg:`
+ <defs><pattern id="b1" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="#cdeee8"/><path d="M0 0H50M0 0V50" stroke="#a8d8d0" stroke-width="3"/></pattern></defs>
+ <rect width="800" height="450" fill="url(#b1)"/><rect y="360" width="800" height="90" fill="#6a8a9a"/>
+ <rect x="80" y="36" width="260" height="232" rx="14" fill="#8a9aa8"/><rect x="90" y="46" width="240" height="212" rx="8" fill="#e8f4fa"/><polygon points="110,56 160,56 110,150" fill="#fff" opacity=".7"/><polygon points="200,56 226,56 130,250 104,250" fill="#fff" opacity=".4"/>
+ <rect x="50" y="318" width="320" height="30" rx="6" fill="#f4f4f4"/><rect x="60" y="348" width="300" height="90" fill="#e8e0d0"/><path d="M200 318 v-28 q0 -10 12 -10 h14" stroke="#8a97a0" stroke-width="8" fill="none"/>
+ <rect x="296" y="282" width="28" height="36" rx="4" fill="#ff3d8b"/><rect x="304" y="256" width="5" height="30" fill="#1de9d2"/><rect x="314" y="260" width="5" height="26" fill="#ffd23f"/>
+ <ellipse cx="140" cy="312" rx="24" ry="14" fill="#ffd23f"/><circle cx="160" cy="294" r="12" fill="#ffd23f"/><polygon points="170,294 184,298 170,302" fill="#ff8a2a"/><circle cx="163" cy="291" r="2" fill="#222"/>
+ <rect x="560" y="0" width="240" height="360" fill="#ff9ac8"/><g fill="#fff" opacity=".45"><rect x="590" y="0" width="14" height="360"/><rect x="650" y="0" width="14" height="360"/><rect x="710" y="0" width="14" height="360"/><rect x="770" y="0" width="14" height="360"/></g><rect x="560" y="0" width="240" height="8" fill="#8a97a0"/>
+ <circle cx="470" cy="90" r="40" fill="#fff" stroke="#8a97a0" stroke-width="6"/><path d="M470 90 L470 62 M470 90 L494 98" stroke="#222" stroke-width="4"/>
+ <g fill="none" stroke="#fff" stroke-width="3" opacity=".7"><circle cx="440" cy="250" r="12"/><circle cx="500" cy="220" r="8"/><circle cx="520" cy="270" r="15"/></g>`},
+park:{when:'SATURDAY 4:51 AM',what:'Pre-dawn jog. Out of breath.',svg:`
+ <defs><linearGradient id="p1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14103a"/><stop offset=".55" stop-color="#7a3a6a"/><stop offset="1" stop-color="#ff9a6a"/></linearGradient></defs>
+ <rect width="800" height="300" fill="url(#p1)"/><circle cx="620" cy="296" r="64" fill="#ffb070" opacity=".5"/><rect y="296" width="800" height="154" fill="#1a2a2a"/>
+ <path d="M0 296 q120 -60 240 -10 t240 -6 t320 -20 v36 h-800z" fill="#2a1a4a"/>
+ <g fill="#120c26"><circle cx="90" cy="250" r="40"/><rect x="84" y="262" width="12" height="40"/><circle cx="560" cy="240" r="46"/><rect x="554" y="260" width="12" height="44"/><circle cx="720" cy="262" r="34"/><rect x="715" y="270" width="10" height="32"/></g>
+ <polygon points="300,300 420,300 700,450 20,450" fill="#3a3a4a"/><polygon points="338,306 380,306 470,450 340,450" fill="#4a4a5c" opacity=".7"/>
+ <rect x="168" y="150" width="8" height="150" fill="#2a2a3a"/><rect x="156" y="140" width="32" height="14" rx="4" fill="#ffd966"/><circle cx="172" cy="146" r="40" fill="#ffd966" opacity=".22"/>
+ <rect x="470" y="318" width="90" height="8" fill="#6a4a2a"/><rect x="476" y="326" width="6" height="18" fill="#4a3018"/><rect x="548" y="326" width="6" height="18" fill="#4a3018"/>
+ <g fill="#fff" opacity=".09"><ellipse cx="200" cy="320" rx="180" ry="18"/><ellipse cx="600" cy="340" rx="200" ry="20"/><ellipse cx="400" cy="300" rx="260" ry="12"/></g>
+ <rect x="40" y="290" width="120" height="76" rx="16" fill="#14141f" stroke="#3a3a55" stroke-width="4"/><text x="100" y="326" fill="#39ff88" font-size="26" text-anchor="middle" ${mono}>5:41</text><text x="100" y="352" fill="#ff5a8a" font-size="14" text-anchor="middle" ${mono}>BPM 172</text>`}
+};
+function setScene(L){const s=SC[L.sc];if(!s)return;document.querySelector('#scene svg.room').innerHTML=s.svg;$('scap').innerHTML='<b>'+s.when+'</b><span>'+s.what+'</span>'}
+L1.sc='kitchen';L2.sc='park';L3.sc='movie';L4.sc='car';L5.sc='bath';L6.sc='bedroom';
+L1.call[0]={...L1.call[0],t:"Good, you're up. Finish that toast and get moving."};
+L1.pre=[{me:"Mmf? Mm. (swallows) Morning, Mags."},{t:"Are you EATING? On a news day? Put the cereal down, rookie."}];
+L2.pre=[{me:"(puffing) Mags... I'm running... why are you ringing... at ten to five..."},{t:"Because crime doesn't sleep, and neither do I. Slow down, catch your breath, and listen."}];
+L3.pre=[{me:"Shh! It's the best bit. The creature is about to... oh. Hi, Mags."},{t:"Is that a movie? Pause it. Fake fish are not news. Real fish are."}];
+L4.pre=[{me:"Mags, I'm driving. You're on speaker. Hang on, he's braking."},{t:"Eyes on the road. Do NOT take notes while driving. Just listen, and write it all down once you've parked."}];
+L5.pre=[{me:"Mmgh mmph hmmphh mm."},{t:"Are you brushing your teeth? Spit. I'll wait."},{me:"(spits) Sorry! Minty fresh. Go on."}];
+L6.pre=[{t:"Rookie? Rookie. ...Are you asleep?"},{me:"Nope. Wide awake. Zzz... I mean, hello."},{t:"It's three in the morning. Yes, I know. Crime keeps strange hours."}];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+const QUIPS=["Now THAT'S a front page.","Print it before the rival paper does!","I'd buy that for 50 cents.","Not bad, rookie. Not bad at all.","The presses are rolling!","Readers will gasp at that one."];
+const allDone=()=>Object.keys(S.done).length>=CASES.length;
+function submitHL(){
+ const r=evalHL(D.H,D.lv);if(!r.pass)return;
+ const facts=[...new Set(D.H.filter(t=>t.ct==='fact').map(t=>t.ck))].slice(0,3).map(k=>CLUES[k].txt);
+ const base=100*D.lv.dev.length+25*Math.min(r.factTiles,4),fld=fieldPts();
+ const hl=hltext(D.H),pts=Math.max(0,base+fld);S.done[CI]={hl,pts,facts};
+ openM(`<span class="call">Story filed</span><div class="big">Radical!</div><div class="hl" style="min-height:0"><button style="pointer-events:none">${esc(hl)}</button></div><div class="bubble"><b>Mags:</b> ${pick(QUIPS)}<br><span class="mute">+${pts} points<br>Headline ${base} · Field work ${fld} (${leadCount()} leads, ${G.notes.length} notes${G.full?', full coverage +50':''}${G.pen?', cred penalty -'+G.pen:''})</span></div><button class="btn teal" id="ok">See your front page</button>`);
+ sfx.ding();
+ $('ok').onclick=()=>{closeM();G=null;D=null;front();show('front');if(allDone()&&!S.promo){S.promo=1;setTimeout(editorRound,350)}};
+}
+/* bonus round: you are Mags' assistant editor and name the device in each headline */
+function editorRound(){
+ const qs=shuf(POOL).slice(0,5);let n=0,pts=0;
+ const intro=()=>{openM(`<span class="call">Bonus round</span><div class="big" style="color:#fff">Promoted to editor!</div><div class="bubble"><b>Mags:</b> You've earned a desk, rookie. You started on Tuesday with an alligator in a gift shop and finished on Thursday with the same alligator in a motel bed. You're my assistant editor now. Headlines are piling up on my desk and I need you to name the language device in each one. 20 points for every one you get first try.</div><button class="btn teal" id="go">Take the desk</button> <button class="btn ghost" id="no">Not now</button>`);
+  $('go').onclick=ask;$('no').onclick=()=>{closeM()}};
+ const ask=()=>{
+  const q=qs[n],keys=Object.keys(DEV),opts=shuf([q.d,...shuf(keys.filter(k=>k!==q.d)).slice(0,3)]);let first=true;
+  openM(`<span class="call">Editor's desk ${n+1}/5</span><div class="big" style="color:#fff">${esc(q.h)}</div><p class="mute">Which device is this headline using?</p><div class="opts">${opts.map(o=>`<button class="btn" data-o="${o}">${DEV[o].n}</button>`).join('')}</div>`);
+  $('sheet').onclick=e=>{const b=e.target.closest('[data-o]');if(!b||b.disabled)return;
+   if(b.dataset.o===q.d){b.className='btn good';sfx.ding();if(first)pts+=20;$('sheet').onclick=null;setTimeout(()=>{n++;n<5?ask():end()},650)}
+   else{first=false;sfx.no();b.className='btn bad';b.disabled=true}}};
+ const end=()=>{const best=Math.max(S.bonus||0,pts);S.bonus=best;
+  openM(`<span class="call">Bonus round done</span><div class="big">${pts>=80?'Editor of the year!':pts>=40?'Sharp eye!':'Keep practising'}</div><div class="bubble"><b>Mags:</b> ${pts}/100 on the desk. Your best bonus score counts toward your total.</div><button class="btn teal" id="ok">Back to the front page</button>`);
+  $('ok').onclick=()=>{closeM();front()}};
+ intro();
+}
+function front(){
+ const d=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('front').innerHTML=`<div class="row noprint" style="justify-content:space-between"><button class="btn ghost sm" id="f-back">Back to cases</button><button class="btn sun sm" id="f-bonus">Bonus: editor\'s desk</button><span class="mute" style="font-size:13px">To keep a copy, take a screenshot of this page.</span></div><div class="scroll" style="flex:1"><div class="paper"><div class="mast"><h1>The Gulch Gazette</h1><small>${esc(d)} · Gator Gulch &amp; surrounding swamp · 50¢</small></div><div class="stories">${CASES.map((l,i)=>{const s=S.done[i];
+  return s?`<div class="story"><span class="by">Case ${i+1} · ${esc(l.n)}</span><div class="h">${esc(s.hl)}</div><span class="by">By ${esc(jname())}</span><div>${l.d.map(x=>'<span class="chip">'+DEV[x].n+'</span>').join(' ')}</div><div class="fx">${s.facts.map(esc).join(' ')}</div></div>`:`<div class="story empty"><span class="by">Case ${i+1} · ${esc(l.n)}</span><div class="h">Story not filed</div></div>`}).join('')}</div><div class="foot"><span>Reporter: <b>${esc(S.real)}</b> (writing as ${esc(jname())})</span><span>Score: <b>${total()}</b></span></div></div></div>`;
+ $('f-back').onclick=()=>{renderCases();show('cases')};$('f-bonus').onclick=()=>{if(allDone())editorRound();else{const n=Object.keys(S.done).length;openM(`<span class="call">Editor's desk</span><div class="big" style="color:#fff">Not yet, rookie</div><div class="bubble"><b>Mags:</b> A desk is earned. File a story on every case and then we'll talk promotion. You've filed ${n} of ${CASES.length}.</div><button class="btn teal" id="ok">Back to the front page</button>`);$('ok').onclick=closeM}};
+ $('f-bonus').classList.toggle('dis',!allDone());$('f-bonus').textContent=allDone()?"Bonus: editor's desk":"Editor's desk: locked ("+Object.keys(S.done).length+"/"+CASES.length+")";
+}
+/* boot */
+try{['20px Bangers','12px "Press Start 2P"','700 16px Rubik'].forEach(f=>document.fonts.load(f))}catch(e){}
+$('modal').addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('gesturestart',e=>e.preventDefault());
+renderSetup();show('title');
+</script>
